@@ -1,15 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadGatewayException } from '@nestjs/common';
 import { FormsService } from './forms.service';
-import { CreateFormDto } from './dto/create-form.dto';
+import { CreateContactUsFormDto, CreateFormDto } from './dto/create-contact-us-form.dto';
 import { UpdateFormDto } from './dto/update-form.dto';
+
 
 @Controller('forms')
 export class FormsController {
   constructor(private readonly formsService: FormsService) {}
 
   @Post('contact-us')
-  createContactUs(@Body() createFormDto: CreateFormDto) {
-    return this.formsService.create(createFormDto);
+  createContactUs(@Body() createContactUsFormDto: CreateContactUsFormDto) {
+    try {
+      return this.formsService.createContactUsForm(createContactUsFormDto);
+    } catch (e) {
+      throw new BadGatewayException();
+    }
   }
   @Post('volunteer-applications')
   createVolunteer(@Body() createFormDto: CreateFormDto) {
