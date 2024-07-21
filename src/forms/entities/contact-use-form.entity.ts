@@ -1,20 +1,21 @@
-import { BaseEntity } from 'src/common/entities/base.entity';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { BaseEntity } from '../../db/base.entity';
+
 
 @Entity()
 export class ContactUsForm extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryKey()
+  id!: number;
 
-  @Column()
+  @Property()
   firstName: string;
 
-  @Column()
+  @Property()
   lastName: string;
 
-  @Column({ default: true })
+  @Property()
   email: string;
 
-  @Column({ default: true })
+  @Property()
   message: string;
 }
