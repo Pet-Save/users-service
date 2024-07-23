@@ -17,5 +17,5 @@ export class CreateContactUsFormDto {
     @IsNotEmpty()
     message: string;
 }
-    
+
 export class CreateFormDto {}
