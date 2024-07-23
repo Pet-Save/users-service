@@ -1,6 +1,6 @@
 import { IsNumber, IsEmail } from "class-validator"
 
-export class CreateApplicantsChildrenInfoDto {
+export class CreateApplicantsPetsInfoDto {
     @IsNumber()
     age: number
 
