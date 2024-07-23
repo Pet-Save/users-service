@@ -85,7 +85,7 @@
           "mappedType": "integer"
         }
       },
-      "name": "applicant_household",
+      "name": "applicants_household_info",
       "schema": "public",
       "indexes": [
         {
@@ -93,13 +93,13 @@
             "id"
           ],
           "composite": false,
-          "keyName": "applicant_household_id_index",
+          "keyName": "applicants_household_info_id_index",
           "constraint": false,
           "primary": false,
           "unique": false
         },
         {
-          "keyName": "applicant_household_pkey",
+          "keyName": "applicants_household_info_pkey",
           "columnNames": [
             "id"
           ],
