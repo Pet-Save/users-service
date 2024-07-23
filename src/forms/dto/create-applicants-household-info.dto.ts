@@ -1,6 +1,6 @@
-import { IsString, IsNumber, IsEmail } from "class-validator"
+import { IsString, IsNumber, IsEmail, IsOptional } from "class-validator"
 
-export class CreateApplicantsHouseholdDto {
+export class CreateApplicantsHouseholdInfoDto {
     @IsString()
     name: string
 
