@@ -1,15 +1,12 @@
-import { Entity, Property } from "@mikro-orm/core";
-import { CreateTimeSessionDto } from "../dto/create-time-session.dto";
+import { Collection, Entity, OneToMany, Property } from "@mikro-orm/core";
 import { BaseEntity } from "../../db/base.entity";
+import { VolunteersAvailability } from "../../forms/entities/volunteers-availability.entity";
 
 @Entity()
 export class TimeSessions extends BaseEntity {
     @Property()
     session: string;
-    constructor({ timeSession, email }: CreateTimeSessionDto) {
-        super();
-        this.session = timeSession;
-        this.createdBy = email;
-        this.updatedBy = email;
-      }    
+
+    @OneToMany(() => VolunteersAvailability, availability => availability.timeSession)
+    books1 = new Collection<VolunteersAvailability>(this);
 }

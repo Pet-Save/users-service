@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsString, IsEmail, IsNotEmpty, IsNotEmptyObject, IsBoolean, IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
 import { IsAtLeastOneFieldDefined } from 'src/common/decorators/isAtLeastOneFieldDefined';
+import { Day } from '../entities/volunteers-availability.entity';
 
 class Timetable {
     @IsOptional()
@@ -86,15 +87,7 @@ export class CreateVolunteerApplicationFormDto {
     emergencyContactPhoneNumber: string;
 
     @IsNotEmptyObject()
-    @IsAtLeastOneFieldDefined([
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-    ])
+    @IsAtLeastOneFieldDefined(Object.values(Day))
     @Type(() => Timetable)
     @ValidateNested()
     timetable!: Timetable;
