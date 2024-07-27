@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FormsModule } from './forms/forms.module';
 import mikroOrm from './db/mikro-orm.config.js';
 import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+import { SettingsModule } from './settings/settings.module';
 
 
 @Module({
@@ -21,6 +22,7 @@ import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
       inject: [ConfigService],
     }),
     FormsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
