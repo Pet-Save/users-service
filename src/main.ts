@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { Logger, ValidationPipe } from '@nestjs/common';    // IMPORTING LOGGER
+import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';    // IMPORTING LOGGER
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -13,6 +13,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
   }));
+  app.setGlobalPrefix('api/v1', {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  });
   const logger = new Logger();             // CREATING INSTANCE OF LOGGER
   
   await app.listen(PORT);
