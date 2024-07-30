@@ -902,6 +902,18 @@
           "unique": false
         },
         {
+          "keyName": "volunteers_availability_available_day_user_id_time_ed7a7_unique",
+          "columnNames": [
+            "available_day",
+            "user_id",
+            "time_session_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "volunteers_availability_pkey",
           "columnNames": [
             "id"
