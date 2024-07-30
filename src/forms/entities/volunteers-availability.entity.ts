@@ -1,4 +1,4 @@
-import { Entity, Enum, ManyToOne } from "@mikro-orm/core";
+import { Entity, Enum, ManyToOne, Unique } from "@mikro-orm/core";
 import { BaseEntity } from "../../db/base.entity";
 import { Volunteers } from "./volunteers.entity";
 import { TimeSessions } from "../../settings/entities/time-sessions.entity";
@@ -14,13 +14,14 @@ export enum Day {
 }
 
 @Entity()
+@Unique({ properties: ['availableDay', 'user', 'timeSession'] })
 export class VolunteersAvailability extends BaseEntity {
     @Enum(() => Day)
-    availableDay: Day; // numeric/const enum
+    availableDay: Day;
 
-    @ManyToOne() // plain decorator is enough, type will be sniffer via reflection!
+    @ManyToOne()
     user: Volunteers;
 
-    @ManyToOne() // plain decorator is enough, type will be sniffer via reflection!
+    @ManyToOne()
     timeSession: TimeSessions;
 }
