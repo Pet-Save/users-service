@@ -1,43 +1,43 @@
 import { Type } from 'class-transformer';
-import { IsString, IsEmail, IsNotEmpty, IsNotEmptyObject, IsBoolean, IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsNotEmptyObject, IsArray, IsInt, IsOptional, ValidateNested } from 'class-validator';
 import { IsAtLeastOneFieldDefined } from 'src/common/decorators/isAtLeastOneFieldDefined';
 import { Day } from '../entities/volunteers-availability.entity';
 
 class Timetable {
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    monday?: boolean[];
+    @IsInt({ each: true })
+    monday?: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    tuesday: boolean[];
+    @IsInt({ each: true })
+    tuesday: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    wednesday: boolean[];
+    @IsInt({ each: true })
+    wednesday: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    thursday: boolean[];
+    @IsInt({ each: true })
+    thursday: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    friday: boolean[];
+    @IsInt({ each: true })
+    friday: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    saturday: boolean[];
+    @IsInt({ each: true })
+    saturday: number[];
 
     @IsOptional()
     @IsArray()
-    @IsBoolean({ each: true })
-    sunday: boolean[]
+    @IsInt({ each: true })
+    sunday: number[]
 }
 
 export class CreateVolunteerApplicationFormDto {
