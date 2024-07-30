@@ -1,0 +1,5 @@
+enum CACHE_KEYS {
+    TIME_SESSIONS = "TIME_SESSIONS"
+}
+
+export default CACHE_KEYS;
