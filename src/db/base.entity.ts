@@ -1,7 +1,9 @@
-import { Index, PrimaryKey, Property } from '@mikro-orm/core';
+import { Index, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
 
 
 export abstract class BaseEntity{
+    [OptionalProps]?: 'createdAt' | 'updatedAt';
+
     @Index()
     @PrimaryKey()
     id!: number;
@@ -9,7 +11,7 @@ export abstract class BaseEntity{
     @Property({ onCreate: () => new Date() })
     createdAt = new Date();
   
-    @Property({ onUpdate: () => new Date() })
+    @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
     updatedAt = new Date();
 
     @Property()

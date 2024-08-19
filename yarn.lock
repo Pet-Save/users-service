@@ -763,6 +763,14 @@
     globby "11.1.0"
     ts-morph "23.0.0"
 
+"@mikro-orm/seeder@6.3.0":
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/@mikro-orm/seeder/-/seeder-6.3.0.tgz#c91eef614b2b46aa5c103cc787af70ebb9c65466"
+  integrity sha512-ieIT7JcqOOdwaeQpM7BOv3sQPBUIF9pDBkCU5Md+mJZGR37+3Lee7mSTkl2VROQZT3upFX7LZLzw60asXuwFMA==
+  dependencies:
+    fs-extra "11.2.0"
+    globby "11.1.0"
+
 "@mikro-orm/sql-highlighter@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@mikro-orm/sql-highlighter/-/sql-highlighter-1.0.1.tgz#f821cad6d6dbd6fd8be486e223f2d92fd6a280e6"
