@@ -8,6 +8,7 @@ import { ApplicationTypes } from '../../settings/entities/form-types.entity';
 import { HouseholdTypes } from '../../settings/entities/household-types.entity';
 import { HouseOwnershipTypes } from '../../settings/entities/house-ownership-types.entity';
 import { UserTypes } from '../../settings/entities/user-types.entity';
+import { PetCategories } from '../../pets/entities/pet_categories.entity';
 
 export class DatabaseSeeder extends Seeder {
 
@@ -120,6 +121,19 @@ export class DatabaseSeeder extends Seeder {
 
     userTypes.forEach((value) => {
       em.create(UserTypes, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
+    })
+
+    const petCategories = [
+      'DOG',
+      'CAT',
+    ]
+
+    petCategories.forEach((value) => {
+      em.create(PetCategories, {
         value,
         createdBy: 'kuenyuikwok1106@outlook.com',
         updatedBy: 'kuenyuikwok1106@outlook.com',
