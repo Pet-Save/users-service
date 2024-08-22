@@ -4,10 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';    // IMPORTING LOGGER
 
 import * as dotenv from 'dotenv';
+import helmet from 'helmet';
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
   const configService = app.get(ConfigService);
   const PORT = configService.get<string>('PORT') || 3000;
   app.useGlobalPipes(new ValidationPipe({
