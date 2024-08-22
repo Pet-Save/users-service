@@ -2,7 +2,7 @@ import { Type } from "class-transformer";
 import { IsOptional, IsArray, IsInt, IsString, IsNotEmpty, IsEmail, IsNotEmptyObject, ValidateNested, Length, IsDecimal, IsNumber, IsEnum } from "class-validator";
 import { IsAtLeastOneFieldDefined } from "../../common/decorators/isAtLeastOneFieldDefined";
 
-enum Day {
+export enum DAY {
     MONDAY = 'monday',
     TUESDAY = 'tuesday',
     WEDNESDAY = 'wednesday',
@@ -12,7 +12,7 @@ enum Day {
     SUNDAY = 'sunday'
 }
 
-enum Time {
+export enum TIME {
     MORNING = 'morning',
     AFTERNOON = 'afternoon',
     EVENING = 'evening',
@@ -22,38 +22,38 @@ enum Time {
 class Timetable {
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    monday?: Time[];
+    @IsEnum(TIME, { each: true })
+    monday?: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    tuesday: Time[];
+    @IsEnum(TIME, { each: true })
+    tuesday: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    wednesday: Time[];
+    @IsEnum(TIME, { each: true })
+    wednesday: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    thursday: Time[];
+    @IsEnum(TIME, { each: true })
+    thursday: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    friday: Time[];
+    @IsEnum(TIME, { each: true })
+    friday: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    saturday: Time[];
+    @IsEnum(TIME, { each: true })
+    saturday: TIME[];
 
     @IsOptional()
     @IsArray()
-    @IsEnum(Time, { each: true })
-    sunday: Time[]
+    @IsEnum(TIME, { each: true })
+    sunday: TIME[]
 }
 
 export class CreateVolunteerDto {
@@ -122,7 +122,7 @@ export class CreateVolunteerDto {
     distanceWillingToTravel: number;
 
     @IsNotEmptyObject()
-    @IsAtLeastOneFieldDefined(Object.values(Day))
+    @IsAtLeastOneFieldDefined(Object.values(DAY))
     @Type(() => Timetable)
     @ValidateNested()
     timetable!: Timetable;

@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadGatewayException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadGatewayException, UnprocessableEntityException } from '@nestjs/common';
 import { FormsService } from './forms.service';
 import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
-import { UpdateFormDto } from './dto/update-form.dto';
-import { CreatePetFormDto } from './dto/create-pet-application-form.dto';
-import { CreateVolunteerApplicationFormDto } from './dto/create-volunteer-application-form.dto';
+import { CreateVolunteerDto } from './dto/create-volunteer.dto';
+import { CreateApplicationDto } from './dto/create-application.dto';
+
 
 @Controller('forms')
 export class FormsController {
@@ -12,63 +12,70 @@ export class FormsController {
   @Post('contact-us')
   createContactUs(@Body() createContactUsFormDto: CreateContactUsFormDto) {
     try {
-      return this.formsService.createContactUsForm(createContactUsFormDto);
+      return this.formsService.createContactUs(createContactUsFormDto);
     } catch (e) {
       return new BadGatewayException(e);
     }
   }
 
   @Post('volunteer-applications')
-  createVolunteer(@Body() createVolunteerApplicationForm: CreateVolunteerApplicationFormDto) {
+  createVolunteer(@Body() createVolunteerDto: CreateVolunteerDto) {
     try {
-      return this.formsService.createVolunteerApplicationForm(createVolunteerApplicationForm);
+      return this.formsService.createVolunteer(createVolunteerDto);
     } catch (e) {
       return new BadGatewayException(e);
     }
   }
   
-
   @Post('pets-applications')
-  createPets(
-    @Body() createFormDto: CreatePetFormDto
-  ) {
-    try {
-      let res = null;
+  async createApplications(@Body() createApplicationDto: CreateApplicationDto) {
+    try{
       switch(true) {
-        case("adoptPets" in createFormDto): {
-          res = this.formsService.createPetAdoptionForm(createFormDto)
-          break;
+        case("adoptPet" in createApplicationDto && createApplicationDto?.adoptPet?.length > 0): {
+          return this.formsService.createPetAdoption(createApplicationDto)
         }
-        case("fosterTypes" in createFormDto): {
-          break;
-  
+        case("fosterPetTypeId" in createApplicationDto && createApplicationDto.fosterPetTypeId.length > 0): {
+          return await this.formsService.createPetFoster(createApplicationDto)
         }
         default: {
-          break;
+          return new UnprocessableEntityException()
         }
       }
     } catch(e) {
-      return new BadGatewayException(e);
+      console.log(e)
+
     }
   }
 
-  @Get()
-  findAll() {
-    return this.formsService.findAll();
+  @Get('foster/:id')
+  async findOnePetFoster(@Param('id') id: number) {
+    try{
+    return this.formsService.findOnePetFoster(id);
+    } catch(e) {
+
+    }
+
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.formsService.findOne(+id);
-  }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFormDto: UpdateFormDto) {
-    return this.formsService.update(+id, updateFormDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.formsService.remove(+id);
-  }
+  // @Get()
+  // findAll() {
+  //   return this.formsService.findAll();
+  // }
+
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.formsService.findOne(+id);
+  // }
+
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateFormDto: UpdateFormDto) {
+  //   return this.formsService.update(+id, updateFormDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.formsService.remove(+id);
+  // }
 }

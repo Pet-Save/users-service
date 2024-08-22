@@ -1,8 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20240822161404 extends Migration {
+export class Migration20240822204423 extends Migration {
 
   async up(): Promise<void> {
+    this.addSql('create table "application_types" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz not null, "created_by" varchar(255) not null, "updated_by" varchar(255) not null, "value" varchar(255) not null);');
+    this.addSql('create index "application_types_id_index" on "application_types" ("id");');
+    this.addSql('alter table "application_types" add constraint "application_types_value_unique" unique ("value");');
+
     this.addSql('create table "contact_us_messages" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz not null, "created_by" varchar(255) not null, "updated_by" varchar(255) not null, "first_name" varchar(20) not null, "last_name" varchar(20) not null, "email" varchar(100) not null, "message" text not null, "is_reviewed" boolean not null);');
     this.addSql('create index "contact_us_messages_id_index" on "contact_us_messages" ("id");');
 
@@ -39,6 +43,8 @@ export class Migration20240822161404 extends Migration {
     this.addSql('create index "pet_categories_id_index" on "pet_categories" ("id");');
     this.addSql('alter table "pet_categories" add constraint "pet_categories_value_unique" unique ("value");');
 
+    this.addSql('create table "foster_applications_pet_type" ("foster_applications_id" int not null, "pet_categories_id" int not null, constraint "foster_applications_pet_type_pkey" primary key ("foster_applications_id", "pet_categories_id"));');
+
     this.addSql('create table "pets" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz not null, "created_by" varchar(255) not null, "updated_by" varchar(255) not null, "name" varchar(100) not null, "is_fostered" boolean not null default false, "is_adopted" boolean not null default false, "gender_id" int not null, "pet_category_id" int not null);');
     this.addSql('create index "pets_id_index" on "pets" ("id");');
 
@@ -72,6 +78,9 @@ export class Migration20240822161404 extends Migration {
     this.addSql('alter table "household_info" add constraint "household_info_adopt_application_id_foreign" foreign key ("adopt_application_id") references "adopt_applications" ("id") on update cascade on delete set null;');
     this.addSql('alter table "household_info" add constraint "household_info_household_member_type_id_foreign" foreign key ("household_member_type_id") references "household_member_types" ("id") on update cascade;');
 
+    this.addSql('alter table "foster_applications_pet_type" add constraint "foster_applications_pet_type_foster_applications_id_foreign" foreign key ("foster_applications_id") references "foster_applications" ("id") on update cascade on delete cascade;');
+    this.addSql('alter table "foster_applications_pet_type" add constraint "foster_applications_pet_type_pet_categories_id_foreign" foreign key ("pet_categories_id") references "pet_categories" ("id") on update cascade on delete cascade;');
+
     this.addSql('alter table "pets" add constraint "pets_gender_id_foreign" foreign key ("gender_id") references "gender" ("id") on update cascade;');
     this.addSql('alter table "pets" add constraint "pets_pet_category_id_foreign" foreign key ("pet_category_id") references "pet_categories" ("id") on update cascade;');
 
@@ -83,8 +92,6 @@ export class Migration20240822161404 extends Migration {
     this.addSql('alter table "volunteer_availabilities" add constraint "volunteer_availabilities_volunteer_id_foreign" foreign key ("volunteer_id") references "volunteers" ("id") on update cascade on delete set null;');
     this.addSql('alter table "volunteer_availabilities" add constraint "volunteer_availabilities_day_of_a_week_foreign" foreign key ("day_of_a_week") references "day_of_a_week" ("id") on update cascade;');
     this.addSql('alter table "volunteer_availabilities" add constraint "volunteer_availabilities_time_of_a_day_foreign" foreign key ("time_of_a_day") references "time_of_a_day" ("id") on update cascade;');
-
-    this.addSql('drop table if exists "application_types" cascade;');
   }
 
   async down(): Promise<void> {
@@ -104,11 +111,15 @@ export class Migration20240822161404 extends Migration {
 
     this.addSql('alter table "household_info" drop constraint "household_info_foster_application_id_foreign";');
 
+    this.addSql('alter table "foster_applications_pet_type" drop constraint "foster_applications_pet_type_foster_applications_id_foreign";');
+
     this.addSql('alter table "reference_info" drop constraint "reference_info_foster_application_id_foreign";');
 
     this.addSql('alter table "household_info" drop constraint "household_info_adopt_application_id_foreign";');
 
     this.addSql('alter table "reference_info" drop constraint "reference_info_adopt_application_id_foreign";');
+
+    this.addSql('alter table "foster_applications_pet_type" drop constraint "foster_applications_pet_type_pet_categories_id_foreign";');
 
     this.addSql('alter table "pets" drop constraint "pets_pet_category_id_foreign";');
 
@@ -118,9 +129,7 @@ export class Migration20240822161404 extends Migration {
 
     this.addSql('alter table "volunteer_availabilities" drop constraint "volunteer_availabilities_volunteer_id_foreign";');
 
-    this.addSql('create table "application_types" ("id" serial primary key, "created_at" timestamptz(6) not null, "updated_at" timestamptz(6) not null, "created_by" varchar(255) not null, "updated_by" varchar(255) not null, "value" varchar(255) not null);');
-    this.addSql('create index "application_types_id_index" on "application_types" ("id");');
-    this.addSql('alter table "application_types" add constraint "application_types_value_unique" unique ("value");');
+    this.addSql('drop table if exists "application_types" cascade;');
 
     this.addSql('drop table if exists "contact_us_messages" cascade;');
 
@@ -141,6 +150,8 @@ export class Migration20240822161404 extends Migration {
     this.addSql('drop table if exists "household_info" cascade;');
 
     this.addSql('drop table if exists "pet_categories" cascade;');
+
+    this.addSql('drop table if exists "foster_applications_pet_type" cascade;');
 
     this.addSql('drop table if exists "pets" cascade;');
 

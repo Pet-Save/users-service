@@ -1,65 +1,75 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
-import { UpdateFormDto } from './dto/update-form.dto';
-import { ContactUsForm } from './entities/contact-use-form.entity';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Connection, EntityManager, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { CreateApplicantsHouseholdInfoDto } from './dto/create-applicants-household-info.dto';
-import { ApplicantsHouseholdInfo } from './entities/applicants-household-info.entity';
-import { ApplicantsChildrenInfo } from './entities/applicants-children-info.entity';
-import { CreateApplicantsPetsInfoDto } from './dto/create-applicants-pet-info.dto';
-import { ApplicantsPetsInfo } from './entities/applicants-pets-info.entity';
-import { CreateApplicantsReferencesInfoDto } from './dto/create-applicants-references-info.dto';
-import { ApplicantsReferencesInfo } from './entities/applicants-references-info.entity';
-import { CreatePetAdoptApplicationForms } from './dto/create-pet-application-form.dto';
-import { CreateVolunteerApplicationFormDto } from './dto/create-volunteer-application-form.dto';
-import { Volunteers } from './entities/volunteers.entity';
+import { Connection, EntityManager, IDatabaseDriver, LoadStrategy, MikroORM } from '@mikro-orm/core';
 import { SettingsService } from '../settings/settings.service';
-import { Day, VolunteersAvailability } from './entities/volunteers-availability.entity';
-import { TimeSessions } from 'src/settings/entities/time-sessions.entity';
+import { ContactUsMessages } from './entities/contact-us-messages.entity';
+import { CreateVolunteerDto } from './dto/create-volunteer.dto';
+import { Volunteers } from './entities/volunteers/volunteers.entity';
+import { VolunteerAvailabilities } from './entities/volunteers/volunteer-availabilities.entity';
+import mapByKey from '../common/mapByKey';
+import { CreateApplicationDto, HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from './dto/create-application.dto';
+import { HouseholdTypes } from '../settings/entities/household-types.entity';
+import { HouseOwnershipTypes } from '../settings/entities/house-ownership-types.entity';
+import { FosterApplications } from './entities/applications/foster-applications.entity';
+import { ReferenceInfo } from './entities/applications/reference-info.entity';
+import { HouseholdInfo } from './entities/applications/household-info.entity';
+import { PetCategories } from '../pets/entities/pet_categories.entity';
 
 @Injectable()
 export class FormsService {
   em: EntityManager<IDatabaseDriver<Connection>>;
   constructor(
-    @InjectRepository(ContactUsForm)
-    private readonly contactUsFormRepository: EntityRepository<ContactUsForm>,
     private readonly settingsService: SettingsService,
     private readonly orm: MikroORM,
   ) {
     this.em = this.orm.em.fork();
   }
 
-  async createContactUsForm(createContactUsFormDto: CreateContactUsFormDto) {
+  async createContactUs(createContactUsFormDto: CreateContactUsFormDto) {
     try {
-      const contactUsForm = new ContactUsForm(createContactUsFormDto);
-      await this.em.persist(contactUsForm).flush();
-      return contactUsForm
+      const message = this.em.create(ContactUsMessages, {
+        ...createContactUsFormDto,
+        isReviewed: false,
+        createdBy: createContactUsFormDto.email,
+        updatedBy: createContactUsFormDto.email
+      })
+      await this.em.flush();
+      return message
     } catch(e) {
       return e
     }
   }
 
-  async createVolunteerApplicationForm(createVolunteerApplicationFormDto: CreateVolunteerApplicationFormDto) {
+  async createVolunteer(createVolunteerDto: CreateVolunteerDto) {
     try {
-      const { email, timetable, ...remaining } = createVolunteerApplicationFormDto
-      const volunteer = new Volunteers({ ...remaining, email });      
-      const timeSessions = await this.settingsService.getTimeSessions();
-      Object.entries(timetable).forEach(([day, available]: [string, number[]]) => {
-        if(available !==  undefined) {
-          available.forEach((time) => {
-            const avai = new VolunteersAvailability();
-            avai.availableDay = Day[day.toUpperCase() as keyof typeof Day];
-            const timeSession = timeSessions.get(time);
-            if(!timeSession) throw new NotFoundException();
-            avai.timeSession = timeSession;
-            avai.createdBy = email;
-            avai.updatedBy = email;
-            volunteer.availability.add(avai);
-          })
-        }
-      });
+      const timeOfADay = mapByKey(await this.settingsService.getAllTimeOfADay(), 'value')
+      const dayOfAWeek = mapByKey(await this.settingsService.getAllDayOfAWeek(), 'value');
+
+      const { email, timetable, ...remaining } = createVolunteerDto;
+      const volunteer = this.em.create(Volunteers, {
+        ...remaining,
+        email,
+        createdBy: email,
+        updatedBy: email
+      })
+
+      Object.entries(timetable)
+        .filter(([, time]) => time)
+        .forEach(([day, time]) => {
+          const dayId = dayOfAWeek[day];
+          for(const session of time) {
+            const availability = new VolunteerAvailabilities(
+              dayId,
+              timeOfADay[session]
+            )
+            availability.createdBy = email;
+            availability.updatedBy = email
+            volunteer.availabilities.add(availability)
+          }
+        })
+
       await this.em.persist(volunteer).flush();
       return volunteer;
     } catch(e) {
@@ -67,50 +77,186 @@ export class FormsService {
     }
   }
 
-  async createPetAdoptionForm(createPetAdoptionFormDto: Omit<CreatePetAdoptApplicationForms, "formType"> ) {
+  async createPetAdoption(createPetAdoptionFormDto: CreateApplicationDto) {
     console.log('hi')
-    return 'This action adds a new form';
+    return 'This action adds a adoption form';
   }
 
-  async createHouseholdInfo(createApplicantHouseholdDto: CreateApplicantsHouseholdInfoDto) {
+  async createPetFoster(createPetFosterApplicationForms: CreateApplicationDto) {
     try {
-      const applicantHousehold = new ApplicantsHouseholdInfo(createApplicantHouseholdDto);
-      await this.em.persist(applicantHousehold).flush();
-      return applicantHousehold;
+      const {
+        householdMemberInfo,
+        petsInfo,
+        childrenInfo,
+        // MANDATORY
+        fosterPetTypeId,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        age,
+        address,
+        city,
+        postalCode,
+        socialMediaAccount,
+        allowPets,
+        haveAllergy,
+        haveFencedYard,
+        haveWhatsapp,
+        havePetBefore,
+        havePetNow,
+        haveSurrenderedPetBefore,
+        hoursAlone,
+        stayingPlace,
+        prohibitedPlace,
+        outOfTownPlan,
+        experience,
+        haveChildren,
+        householdType: householdTypeValue,
+        houseOwnershipId,
+        referenceInfo,
+      } = createPetFosterApplicationForms;
+  
+      const householdType = await this.em.findOneOrFail(HouseholdTypes, { value: householdTypeValue });
+      const houseOwnershipType = await this.em.findOneOrFail(HouseOwnershipTypes, houseOwnershipId);
+      const householdMemberTypes = mapByKey(await this.settingsService.getAllHouseholdMemberTypes(), 'value');
+
+      const fosterApplication = this.em.create(FosterApplications, {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        age,
+        address,
+        city,
+        postalCode,
+        socialMediaAccount,
+        allowPets,
+        haveAllergy,
+        haveFencedYard,
+        haveWhatsapp,
+        havePetBefore,
+        haveSurrenderedPetBefore,
+        hoursAlone,
+        stayingPlace,
+        prohibitedPlace,
+        outOfTownPlan,
+        experience,
+        householdType,
+        houseOwnershipType,
+        isReviewed: false,
+        createdBy: email,
+        updatedBy: email
+      })
+
+      const petTypes = await this.em.find(PetCategories, fosterPetTypeId);
+      petTypes.forEach((petType) => {
+        fosterApplication.petType.add(petType);
+      })
+      
+      referenceInfo.forEach(({ name, phoneNumber }) => {
+        const reference = new ReferenceInfo(
+          name,
+          phoneNumber,
+          fosterApplication,
+        )
+        reference.createdBy = email;
+        reference.updatedBy = email
+        fosterApplication.referenceInfo.add(reference)
+      })
+
+      if(householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
+        householdMemberInfo.forEach(({ name, age, occupation }) => {
+            const member = new HouseholdInfo(
+              age,
+              householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT],
+              fosterApplication,
+              name,
+              occupation
+            );
+            member.createdBy = email;
+            member.updatedBy = email
+            fosterApplication.householdInfo.add(member)
+        })
+      }
+
+      if(haveChildren) {
+        childrenInfo.forEach((age) => {
+          const child = new HouseholdInfo(age, householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD], fosterApplication);
+          child.createdBy = email;
+          child.updatedBy = email
+          fosterApplication.householdInfo.add(child)
+        })
+      }
+
+      if(havePetNow) {
+        petsInfo.forEach((age) => {
+          const pet = new HouseholdInfo(age, householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET], fosterApplication);
+          pet.createdBy = email;
+          pet.updatedBy = email
+          fosterApplication.householdInfo.add(pet)
+        })
+      }
+
+      await this.em.persist(fosterApplication).flush();  
+      return await this.findOnePetFoster(fosterApplication.id);
     } catch(e) {
-      return e
+
     }
   }
 
-  async createChildrenInfo(createApplicantChildrenInfoDto: CreateApplicantsHouseholdInfoDto) {
-    try {
-      const applicantChildrenInfo = new ApplicantsChildrenInfo(createApplicantChildrenInfoDto);
-      await this.em.persist(applicantChildrenInfo).flush();
-      return applicantChildrenInfo;
-    } catch(e) {
-      return e
-    }
+  findOnePetFoster(id: number) {
+    return this.em.findOneOrFail(FosterApplications, id, {
+      populate:[
+        'petType',
+        'houseOwnershipType',
+        'householdType',
+        'referenceInfo',
+        'householdInfo',
+        'householdInfo.householdMemberType'
+      ]
+    })
   }
 
-  async createPetsInfo(createApplicantsPetsInfoDto: CreateApplicantsPetsInfoDto) {
-    try {
-      const applicantsPetsInfo = new ApplicantsPetsInfo(createApplicantsPetsInfoDto);
-      await this.em.persist(applicantsPetsInfo).flush();
-      return applicantsPetsInfo;
-    } catch(e) {
-      return e
-    }
-  }
+  // async createHouseholdInfo(createApplicantHouseholdDto: CreateApplicantsHouseholdInfoDto) {
+  //   try {
+  //     const applicantHousehold = new ApplicantsHouseholdInfo(createApplicantHouseholdDto);
+  //     await this.em.persist(applicantHousehold).flush();
+  //     return applicantHousehold;
+  //   } catch(e) {
+  //     return e
+  //   }
+  // }
 
-  async createReferencesInfo(createApplicantsReferencesInfoDto: CreateApplicantsReferencesInfoDto) {
-    try {
-      const applicantsReferencesInfo = new ApplicantsReferencesInfo(createApplicantsReferencesInfoDto);
-      await this.em.persist(applicantsReferencesInfo).flush();
-      return applicantsReferencesInfo;
-    } catch(e) {
-      return e
-    }
-  }
+  // async createChildrenInfo(createApplicantChildrenInfoDto: CreateApplicantsHouseholdInfoDto) {
+  //   try {
+  //     const applicantChildrenInfo = new ApplicantsChildrenInfo(createApplicantChildrenInfoDto);
+  //     await this.em.persist(applicantChildrenInfo).flush();
+  //     return applicantChildrenInfo;
+  //   } catch(e) {
+  //     return e
+  //   }
+  // }
+
+  // async createPetsInfo(createApplicantsPetsInfoDto: CreateApplicantsPetsInfoDto) {
+  //   try {
+  //     const applicantsPetsInfo = new ApplicantsPetsInfo(createApplicantsPetsInfoDto);
+  //     await this.em.persist(applicantsPetsInfo).flush();
+  //     return applicantsPetsInfo;
+  //   } catch(e) {
+  //     return e
+  //   }
+  // }
+
+  // async createReferencesInfo(createApplicantsReferencesInfoDto: CreateApplicantsReferencesInfoDto) {
+  //   try {
+  //     const applicantsReferencesInfo = new ApplicantsReferencesInfo(createApplicantsReferencesInfoDto);
+  //     await this.em.persist(applicantsReferencesInfo).flush();
+  //     return applicantsReferencesInfo;
+  //   } catch(e) {
+  //     return e
+  //   }
+  // }
 
   findAll() {
     return `This action returns all forms`;
@@ -118,10 +264,6 @@ export class FormsService {
 
   findOne(id: number) {
     return `This action returns a #${id} form`;
-  }
-
-  update(id: number, updateFormDto: UpdateFormDto) {
-    return `This action updates a #${id} form`;
   }
 
   remove(id: number) {

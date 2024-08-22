@@ -1,9 +1,10 @@
-import { Collection, DecimalType, Entity, ManyToOne, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
+import { Collection, DecimalType, Entity, ManyToMany, ManyToOne, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
 import { BaseEntity } from "../../../db/base.entity";
 import { HouseholdTypes } from "../../../settings/entities/household-types.entity";
 import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-types.entity";
 import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
+import { PetCategories } from "../../../pets/entities/pet_categories.entity";
 
 @Entity()
 export class FosterApplications extends BaseEntity {
@@ -87,4 +88,7 @@ export class FosterApplications extends BaseEntity {
 
     @ManyToOne()
     houseOwnershipType: HouseOwnershipTypes
+
+    @ManyToMany()
+    petType = new Collection<PetCategories>(this);
 }

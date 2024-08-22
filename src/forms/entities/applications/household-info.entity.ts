@@ -15,10 +15,10 @@ export class HouseholdInfo extends BaseEntity {
     @Property({ length: 50, nullable: true })
     occupation?: string;
 
-    @ManyToOne({ nullable: true })
+    @ManyToOne({ nullable: true, lazy: true, eager: false })
     fosterApplication?: FosterApplications
     
-    @ManyToOne({ nullable: true })
+    @ManyToOne({ nullable: true, lazy: true, eager: false })
     adoptApplication?: AdoptApplications
 
     @ManyToOne()

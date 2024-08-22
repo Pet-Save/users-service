@@ -55,6 +55,106 @@
           "length": 255,
           "mappedType": "string"
         },
+        "value": {
+          "name": "value",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "application_types",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "keyName": "application_types_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "value"
+          ],
+          "composite": false,
+          "keyName": "application_types_value_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "application_types_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "first_name": {
           "name": "first_name",
           "type": "varchar(20)",
@@ -1390,6 +1490,73 @@
       ],
       "checks": [],
       "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "foster_applications_id": {
+          "name": "foster_applications_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "pet_categories_id": {
+          "name": "pet_categories_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "foster_applications_pet_type",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "foster_applications_pet_type_pkey",
+          "columnNames": [
+            "foster_applications_id",
+            "pet_categories_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "foster_applications_pet_type_foster_applications_id_foreign": {
+          "constraintName": "foster_applications_pet_type_foster_applications_id_foreign",
+          "columnNames": [
+            "foster_applications_id"
+          ],
+          "localTableName": "public.foster_applications_pet_type",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.foster_applications",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "foster_applications_pet_type_pet_categories_id_foreign": {
+          "constraintName": "foster_applications_pet_type_pet_categories_id_foreign",
+          "columnNames": [
+            "pet_categories_id"
+          ],
+          "localTableName": "public.foster_applications_pet_type",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.pet_categories",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {
