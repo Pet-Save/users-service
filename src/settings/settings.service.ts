@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateTimeSessionDto } from './dto/create-time-session.dto';
 import { EntityManager, IDatabaseDriver, Connection, MikroORM } from '@mikro-orm/core';
-import { TimeSessions } from './entities/time-sessions.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import CACHE_KEYS from '../common/cache-keys';
-import CACHE_TIMES from '../common/cache-times';
+import { TimeOfADay } from './entities/time-of-a-day.entity';
+import { DayOfAWeek } from './entities/day-of-a-week.entity';
+import { HouseholdMemberTypes } from './entities/household-member-type.entity';
+import { HouseholdTypes } from './entities/household-types.entity';
+import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
 
 @Injectable()
 export class SettingsService {
@@ -18,40 +20,24 @@ export class SettingsService {
     this.em = this.orm.em.fork();
   }
 
-  getTimeSession(id: number) {
-    try{
-      return this.em.findOneOrFail(TimeSessions, id);
-    } catch(e) {
-      throw e
-    }
+  getAllTimeOfADay() {
+    return this.em.findAll(TimeOfADay);
   }
 
-  async getTimeSessions(): Promise<Map<number, TimeSessions>> {
-    try{
-      let sessions = await this.cacheManager.get(CACHE_KEYS.TIME_SESSIONS) as Map<number, TimeSessions>;
-      if (!sessions) {
-        sessions = (await this.em.findAll(
-          TimeSessions,
-          { populate: undefined, }
-        )).reduce((acc,curr) => {
-          acc.set(curr.id, curr);
-          return acc
-        }, new Map<number, TimeSessions>());
-        await this.cacheManager.set(CACHE_KEYS.TIME_SESSIONS, sessions, CACHE_TIMES.ONE_MINUTE);
-      }
-      return sessions
-    } catch(e) {
-      throw e
-    }
+  getAllDayOfAWeek() {
+    return this.em.findAll(DayOfAWeek);
   }
 
-  async createTimeSession(createTimeSessionDto: CreateTimeSessionDto) {
-    try {
-      const timeSession = new TimeSessions(createTimeSessionDto);
-      await this.em.persist(timeSession).flush();
-      return timeSession
-    } catch(e) {
-      throw e
-    }
+  getAllHouseholdTypes() {
+    return this.em.findAll(HouseholdTypes);
   }
+
+  getAllHouseOwnershipTypes() {
+    return this.em.findAll(HouseOwnershipTypes);
+  }
+
+  getAllHouseholdMemberTypes() {
+    return this.em.findAll(HouseholdMemberTypes);
+  }
+
 }
