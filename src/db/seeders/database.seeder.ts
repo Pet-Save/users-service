@@ -31,8 +31,8 @@ export class DatabaseSeeder extends Seeder {
     })
 
     const genders = [
-      'MALE',
-      'FEMALE'
+      'male',
+      'female'
     ]
 
     genders.forEach((value) => {
@@ -60,8 +60,8 @@ export class DatabaseSeeder extends Seeder {
     })
 
     const houseOwnershipTypes = [
-      'RENT',
-      'OWN',
+      'rent',
+      'own',
     ]
 
     houseOwnershipTypes.forEach((value) => {
@@ -73,11 +73,11 @@ export class DatabaseSeeder extends Seeder {
     })
 
     const userTypes = [
-      'ADMIN',
-      'ADOPTER',
-      'FOSTERER',
-      'VOLUNTEER',
-      'USER',
+      'admin',
+      'adopter',
+      'fosterer',
+      'volunteer',
+      'user',
     ]
 
     userTypes.forEach((value) => {
