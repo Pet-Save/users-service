@@ -6,7 +6,14 @@ on:
       - main
 
 env:
-  AWS_REGION: us-east-2     
+  AWS_REGION: us-east-2
+  AWS_RDS_TYPE: ${{secrets.AWS_RDS_TYPE}}
+  AWS_RDS_HOST: ${{secrets.AWS_RDS_HOST}}
+  AWS_RDS_PORT: ${{secrets.AWS_RDS_PORT}}
+  AWS_RDS_USERNAME: ${{secrets.AWS_RDS_USERNAME}}
+  AWS_RDS_PASSWORD: ${{secrets.AWS_RDS_PASSWORD}}
+  AWS_RDS_DATABASE: ${{secrets.AWS_RDS_DATABASE}}
+  ECR_REPOSITORY: pet-save-backend
 
 jobs:
   deploy:
@@ -22,7 +29,27 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
-            
+
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Build, tag, and push image to Amazon ECR
+          id: build-image
+          env:
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            IMAGE_TAG: ${{ github.sha }}
+          run: |
+            # Build a docker container and push it to ECR so that it can be deployed to ECS.
+            docker build \
+            --build-arg PORT=8080\
+            --build-arg ENV=PRODUCTION\
+            --build-arg DB_TYPE=${{env.AWS_RDS_TYPE}}\
+            --build-arg DB_HOST=${{env.AWS_RDS_HOST}}\
+            --build-arg DB_PORT=${{env.AWS_RDS_PORT}}\
+            --build-arg DB_USERNAME=${{env.AWS_RDS_USERNAME}}\
+            --build-arg DB_PASSWORD=${{env.AWS_RDS_PASSWORD}}\
+            --build-arg DB_DATABASE=${{env.AWS_RDS_DATABASE}}\
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT

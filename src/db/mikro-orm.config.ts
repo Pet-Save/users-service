@@ -10,7 +10,7 @@ import { config as dotenvConfig } from 'dotenv';
 dotenvConfig({ path: '.env' });
 
 const config = defineConfig({
-  host: `${process.env.DB_HOST}`,
+  host: process.env.DB_HOST,
   port: +`${process.env.DB_PORT}`,
   user: `${process.env.DB_USERNAME}`,
   password: `${process.env.DB_PASSWORD}`,
@@ -25,6 +25,9 @@ const config = defineConfig({
     options: {
       cacheDir: './src/db/temp'
     }
+  },
+  driverOptions: {
+    connection: { ssl: { rejectUnauthorized: false } },
   },
   namingStrategy: UnderscoreNamingStrategy,
   // @ts-expect-error nestjs adapter option
