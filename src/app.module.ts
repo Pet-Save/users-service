@@ -8,6 +8,7 @@ import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 import { SettingsModule } from './settings/settings.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { PetsModule } from './pets/pets.module';
+import { HealthModule } from './health/health.module';
 
 
 @Module({
@@ -27,6 +28,7 @@ import { PetsModule } from './pets/pets.module';
     FormsModule,
     SettingsModule,
     PetsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
