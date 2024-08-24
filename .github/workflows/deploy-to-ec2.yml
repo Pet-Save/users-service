@@ -43,14 +43,9 @@ jobs:
             # Build a docker container and push it to ECR so that it can be deployed to ECS.
             docker build \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --build-arg PORT=8080 \
             --build-arg ENV=PRODUCTION \
-            --build-arg DB_TYPE=${{env.AWS_RDS_TYPE}} \
-            --build-arg DB_HOST=${{env.AWS_RDS_HOST}} \
-            --build-arg DB_PORT=${{env.AWS_RDS_PORT}} \
-            --build-arg DB_USERNAME=${{env.AWS_RDS_USERNAME}} \
-            --build-arg DB_PASSWORD=${{env.AWS_RDS_PASSWORD}} \
-            --build-arg DB_DATABASE=${{env.AWS_RDS_DATABASE}} \
             .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+            echo "image=$ECR_REGISTRY/$ECR_REPOSITORY --all-tags" >> $GITHUB_OUTPUT
