@@ -14,26 +14,20 @@ import { HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from '../../forms/dto/create-a
 export class DatabaseSeeder extends Seeder {
 
   async run(em: EntityManager): Promise<void> {
-    Object.values(TIME).forEach(async (value) => {
-      const time = await em.findOne(TimeOfADay, { value })
-      if(!time) {
-        em.create(TimeOfADay, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
+    Object.values(TIME).forEach((value) => {
+      em.create(TimeOfADay, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
-    Object.values(DAY).forEach(async (value) => {
-      const day = await em.findOne(TimeOfADay, { value })
-      if(!day) {
-        em.create(DayOfAWeek, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
+    Object.values(DAY).forEach((value) => {
+      em.create(DayOfAWeek, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
     const genders = [
@@ -41,39 +35,28 @@ export class DatabaseSeeder extends Seeder {
       'female'
     ]
 
-    genders.forEach(async (value) => {
-      const gender = await em.findOne(Gender, { value })
-      if(!gender) {
-        em.create(Gender, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
-
+    genders.forEach((value) => {
+      em.create(Gender, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
-    Object.values(HOUSEHOLD_MEMBER_TYPE).forEach(async (value) => {
-      const type = await em.findOne(HouseholdMemberTypes, { value })
-      if(!type) {
-        em.create(HouseholdMemberTypes, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
-
+    Object.values(HOUSEHOLD_MEMBER_TYPE).forEach((value) => {
+      em.create(HouseholdMemberTypes, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
-    Object.values(HOUSEHOLD_TYPES).forEach(async (value) => {
-      const type = await em.findOne(HouseholdTypes, { value })
-      if(!type) {
-        em.create(HouseholdTypes, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
+    Object.values(HOUSEHOLD_TYPES).forEach((value) => {
+      em.create(HouseholdTypes, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
     const houseOwnershipTypes = [
@@ -81,15 +64,12 @@ export class DatabaseSeeder extends Seeder {
       'own',
     ]
 
-    houseOwnershipTypes.forEach(async (value) => {
-      const type = await em.findOne(HouseOwnershipTypes, { value })
-      if(!type) {
-        em.create(HouseOwnershipTypes, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
+    houseOwnershipTypes.forEach((value) => {
+      em.create(HouseOwnershipTypes, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
     const userTypes = [
@@ -100,27 +80,20 @@ export class DatabaseSeeder extends Seeder {
       'user',
     ]
 
-    userTypes.forEach(async (value) => {
-      const type = await em.findOne(UserTypes, { value })
-      if(!type) {
-        em.create(UserTypes, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
+    userTypes.forEach((value) => {
+      em.create(UserTypes, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
 
-    Object.values(PET_CATEGORY).forEach(async(value) => {
-      const type = await em.findOne(PetCategories, { value })
-      if(!type) {
-        em.create(PetCategories, {
-          value,
-          createdBy: 'kuenyuikwok1106@outlook.com',
-          updatedBy: 'kuenyuikwok1106@outlook.com',
-        });
-      }
-
+    Object.values(PET_CATEGORY).forEach((value) => {
+      em.create(PetCategories, {
+        value,
+        createdBy: 'kuenyuikwok1106@outlook.com',
+        updatedBy: 'kuenyuikwok1106@outlook.com',
+      });
     })
     await em.flush();
   }
