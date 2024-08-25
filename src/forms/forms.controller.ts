@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadGatewayException, UnprocessableEntityException } from '@nestjs/common';
-import { FormsService } from './forms.service';
+import { BadGatewayException, Body, Controller, Get, Param, Post, UnprocessableEntityException } from '@nestjs/common';
+import { CreateApplicationDto } from './dto/create-application.dto';
 import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
 import { CreateVolunteerDto } from './dto/create-volunteer.dto';
-import { CreateApplicationDto } from './dto/create-application.dto';
+import { FormsService } from './forms.service';
 
 
 @Controller('forms')
@@ -32,18 +32,17 @@ export class FormsController {
     try{
       switch(true) {
         case("adoptPet" in createApplicationDto && createApplicationDto?.adoptPet?.length > 0): {
-          return this.formsService.createPetAdoption(createApplicationDto)
+          return this.formsService.createPetApplication(createApplicationDto, false)
         }
         case("fosterPetTypeId" in createApplicationDto && createApplicationDto.fosterPetTypeId.length > 0): {
-          return await this.formsService.createPetFoster(createApplicationDto)
+          return await this.formsService.createPetApplication(createApplicationDto, true)
         }
         default: {
           return new UnprocessableEntityException()
         }
       }
     } catch(e) {
-      console.log(e)
-
+      return e
     }
   }
 
@@ -52,30 +51,7 @@ export class FormsController {
     try{
     return this.formsService.findOnePetFoster(id);
     } catch(e) {
-
+      return e
     }
-
   }
-
-
-
-  // @Get()
-  // findAll() {
-  //   return this.formsService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.formsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateFormDto: UpdateFormDto) {
-  //   return this.formsService.update(+id, updateFormDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.formsService.remove(+id);
-  // }
 }

@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToOne, OneToMany, Property } from "@mikro-orm/core";
+import { Collection, DecimalType, Entity, ManyToMany, ManyToOne, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
 import { BaseEntity } from "../../../db/base.entity";
 import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-types.entity";
 import { HouseholdTypes } from "../../../settings/entities/household-types.entity";
@@ -18,7 +18,58 @@ export class AdoptApplications extends BaseEntity {
 
     @Property({ length: 50 })
     phoneNumber: string;
+
+    @Property({ type: SmallIntType })
+    age: number
+
+    @Property({ length: 255 })
+    address: string;
+
+    @Property({ length: 50 })
+    city: string;
+
+    @Property({ length: 20 })
+    postalCode: string;
+
+    @Property()
+    socialMediaAccount: string;
+
+    @Property()
+    allowPets: boolean;
     
+    @Property()
+    haveAllergy: boolean;
+
+    @Property()
+    haveFencedYard: boolean;
+
+    @Property()
+    haveWhatsapp: boolean;
+
+    @Property()
+    havePetBefore: boolean;
+
+    @Property()
+    haveSurrenderedPetBefore: boolean;
+
+    @Property({ type: DecimalType })
+    hoursAlone: number;
+
+    @Property({ type: TextType })
+    stayingPlace: string;
+
+    @Property({ type: TextType })
+    prohibitedPlace: string;
+
+    @Property({ type: TextType })
+    outOfTownPlan: string;
+
+    @Property({ type: TextType })
+    experience: string;
+
+    @Property()
+    isReviewed: boolean;
+
     @OneToMany(
         () => HouseholdInfo,
         householdInfo => householdInfo.adoptApplication
@@ -36,4 +87,7 @@ export class AdoptApplications extends BaseEntity {
 
     @ManyToOne()
     houseOwnershipType: HouseOwnershipTypes
+
+    // @ManyToMany()
+    // petType = new Collection<PetCategories>(this);
 }

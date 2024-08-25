@@ -1,43 +1,75 @@
-import { Injectable } from '@nestjs/common';
-import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { MikroORM } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Connection, EntityManager, IDatabaseDriver, LoadStrategy, MikroORM } from '@mikro-orm/core';
-import { SettingsService } from '../settings/settings.service';
-import { ContactUsMessages } from './entities/contact-us-messages.entity';
-import { CreateVolunteerDto } from './dto/create-volunteer.dto';
-import { Volunteers } from './entities/volunteers/volunteers.entity';
-import { VolunteerAvailabilities } from './entities/volunteers/volunteer-availabilities.entity';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { Injectable } from '@nestjs/common';
 import mapByKey from '../common/mapByKey';
-import { CreateApplicationDto, HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from './dto/create-application.dto';
-import { HouseholdTypes } from '../settings/entities/household-types.entity';
+import { PetsService } from '../pets/pets.service';
 import { HouseOwnershipTypes } from '../settings/entities/house-ownership-types.entity';
+import { HouseholdTypes } from '../settings/entities/household-types.entity';
+import { SettingsService } from '../settings/settings.service';
+import { CreateApplicationDto, HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from './dto/create-application.dto';
+import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
+import { CreateVolunteerDto } from './dto/create-volunteer.dto';
+import { AdoptApplications } from './entities/applications/adopt-applications.entity';
 import { FosterApplications } from './entities/applications/foster-applications.entity';
-import { ReferenceInfo } from './entities/applications/reference-info.entity';
 import { HouseholdInfo } from './entities/applications/household-info.entity';
-import { PetCategories } from '../pets/entities/pet_categories.entity';
+import { ReferenceInfo } from './entities/applications/reference-info.entity';
+import { ContactUsMessages } from './entities/contact-us-messages.entity';
+import { VolunteerAvailabilities } from './entities/volunteers/volunteer-availabilities.entity';
+import { Volunteers } from './entities/volunteers/volunteers.entity';
 
 @Injectable()
 export class FormsService {
-  em: EntityManager<IDatabaseDriver<Connection>>;
   constructor(
     private readonly settingsService: SettingsService,
+    private readonly petsService: PetsService,
+
     private readonly orm: MikroORM,
+    @InjectRepository(ContactUsMessages)
+    private readonly contactUsMessagesRepository: EntityRepository<ContactUsMessages>,
+    @InjectRepository(Volunteers)
+    private readonly volunteersRepository: EntityRepository<Volunteers>,
+    @InjectRepository(VolunteerAvailabilities)
+    private readonly volunteerAvailabilitiesRepository: EntityRepository<VolunteerAvailabilities>,
+    @InjectRepository(FosterApplications)
+    private readonly fosterApplicationsRepository: EntityRepository<FosterApplications>,
+    @InjectRepository(AdoptApplications)
+    private readonly adoptApplicationsRepository: EntityRepository<AdoptApplications>,
+    @InjectRepository(HouseholdTypes)
+    private readonly householdTypesRepository: EntityRepository<HouseholdTypes>,
+    @InjectRepository(HouseholdInfo)
+    private readonly householdInfoRepository: EntityRepository<HouseholdInfo>,
+    @InjectRepository(HouseOwnershipTypes)
+    private readonly houseOwnershipTypesRepository: EntityRepository<HouseOwnershipTypes>,
+    @InjectRepository(ReferenceInfo)
+    private readonly referenceInfoRepository: EntityRepository<ReferenceInfo>,
+
   ) {
-    this.em = this.orm.em.fork();
+    const forkedEm = this.orm.em.fork();
+    this.contactUsMessagesRepository = forkedEm.getRepository(ContactUsMessages);
+    this.volunteersRepository = forkedEm.getRepository(Volunteers);
+    this.volunteerAvailabilitiesRepository = forkedEm.getRepository(VolunteerAvailabilities);
+    this.fosterApplicationsRepository = forkedEm.getRepository(FosterApplications);
+    this.adoptApplicationsRepository = forkedEm.getRepository(AdoptApplications);
+    this.householdTypesRepository = forkedEm.getRepository(HouseholdTypes);
+    this.householdInfoRepository = forkedEm.getRepository(HouseholdInfo);
+    this.houseOwnershipTypesRepository = forkedEm.getRepository(HouseOwnershipTypes);
+    this.referenceInfoRepository = forkedEm.getRepository(ReferenceInfo);
+
   }
 
   async createContactUs(createContactUsFormDto: CreateContactUsFormDto) {
     try {
-      const message = this.em.create(ContactUsMessages, {
+      const message = this.contactUsMessagesRepository.create({
         ...createContactUsFormDto,
         isReviewed: false,
         createdBy: createContactUsFormDto.email,
         updatedBy: createContactUsFormDto.email
       })
-      await this.em.flush();
+      await this.contactUsMessagesRepository.getEntityManager().flush();
       return message
     } catch(e) {
+      console.error(e)
       return e
     }
   }
@@ -48,7 +80,7 @@ export class FormsService {
       const dayOfAWeek = mapByKey(await this.settingsService.getAllDayOfAWeek(), 'value');
 
       const { email, timetable, ...remaining } = createVolunteerDto;
-      const volunteer = this.em.create(Volunteers, {
+      const volunteer = this.volunteersRepository.create({
         ...remaining,
         email,
         createdBy: email,
@@ -60,29 +92,22 @@ export class FormsService {
         .forEach(([day, time]) => {
           const dayId = dayOfAWeek[day];
           for(const session of time) {
-            const availability = new VolunteerAvailabilities(
-              dayId,
-              timeOfADay[session]
-            )
-            availability.createdBy = email;
-            availability.updatedBy = email
-            volunteer.availabilities.add(availability)
+            volunteer.availabilities.add(this.volunteerAvailabilitiesRepository.create({
+              dayOfAWeek: dayId,
+              timeOfADay: timeOfADay[session],
+              createdBy: email,
+              updatedBy: email
+          }))
           }
         })
-
-      await this.em.persist(volunteer).flush();
+      await this.volunteersRepository.getEntityManager().persistAndFlush(volunteer);
       return volunteer;
     } catch(e) {
       throw e
     }
   }
 
-  async createPetAdoption(createPetAdoptionFormDto: CreateApplicationDto) {
-    console.log('hi')
-    return 'This action adds a adoption form';
-  }
-
-  async createPetFoster(createPetFosterApplicationForms: CreateApplicationDto) {
+  async createPetApplication(createPetFosterApplicationForms: CreateApplicationDto, isFoster: boolean) {
     try {
       const {
         householdMemberInfo,
@@ -117,11 +142,11 @@ export class FormsService {
         referenceInfo,
       } = createPetFosterApplicationForms;
   
-      const householdType = await this.em.findOneOrFail(HouseholdTypes, { value: householdTypeValue });
-      const houseOwnershipType = await this.em.findOneOrFail(HouseOwnershipTypes, houseOwnershipId);
+      const householdType = await this.householdTypesRepository.findOneOrFail({ value: householdTypeValue });
+      const houseOwnershipType = await this.houseOwnershipTypesRepository.findOneOrFail(houseOwnershipId);
       const householdMemberTypes = mapByKey(await this.settingsService.getAllHouseholdMemberTypes(), 'value');
 
-      const fosterApplication = this.em.create(FosterApplications, {
+      const dto = {
         firstName,
         lastName,
         email,
@@ -147,126 +172,120 @@ export class FormsService {
         isReviewed: false,
         createdBy: email,
         updatedBy: email
-      })
+      }
 
-      const petTypes = await this.em.find(PetCategories, fosterPetTypeId);
-      petTypes.forEach((petType) => {
-        fosterApplication.petType.add(petType);
-      })
+      const application: FosterApplications | AdoptApplications = isFoster
+      ? this.fosterApplicationsRepository.create(dto)
+      : this.adoptApplicationsRepository.create(dto)
+      
+      if(isFoster) {
+        const petTypes = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
+        petTypes.forEach((petType) => {
+          (application as FosterApplications).petType.add(petType);
+        })
+      }
       
       referenceInfo.forEach(({ name, phoneNumber }) => {
-        const reference = new ReferenceInfo(
+        application.referenceInfo.add(this.referenceInfoRepository.create({
           name,
           phoneNumber,
-          fosterApplication,
-        )
-        reference.createdBy = email;
-        reference.updatedBy = email
-        fosterApplication.referenceInfo.add(reference)
+          fosterApplication: isFoster ? application : null,
+          adoptApplication: !isFoster ? application : null,
+          createdBy: email,
+          updatedBy: email
+        }))
       })
 
       if(householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
         householdMemberInfo.forEach(({ name, age, occupation }) => {
-            const member = new HouseholdInfo(
-              age,
-              householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT],
-              fosterApplication,
+            application.householdInfo.add(this.householdInfoRepository.create({
               name,
-              occupation
-            );
-            member.createdBy = email;
-            member.updatedBy = email
-            fosterApplication.householdInfo.add(member)
+              age,
+              occupation,
+              householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT],
+              fosterApplication: isFoster ? application : null,
+              adoptApplication: !isFoster ? application : null,
+              createdBy: email,
+              updatedBy: email,
+            }))
         })
       }
 
       if(haveChildren) {
         childrenInfo.forEach((age) => {
-          const child = new HouseholdInfo(age, householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD], fosterApplication);
-          child.createdBy = email;
-          child.updatedBy = email
-          fosterApplication.householdInfo.add(child)
+          application.householdInfo.add(this.householdInfoRepository.create({
+            name: null,
+            age,
+            occupation: null,
+            householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD],
+            fosterApplication: isFoster ? application : null,
+            adoptApplication: !isFoster ? application : null,
+            createdBy: email,
+            updatedBy: email,
+          }))
         })
       }
 
       if(havePetNow) {
         petsInfo.forEach((age) => {
-          const pet = new HouseholdInfo(age, householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET], fosterApplication);
-          pet.createdBy = email;
-          pet.updatedBy = email
-          fosterApplication.householdInfo.add(pet)
+          application.householdInfo.add(this.householdInfoRepository.create({
+            name: null,
+            age,
+            occupation: null,
+            householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET],
+            fosterApplication: isFoster ? application : null,
+            adoptApplication: !isFoster ? application : null,
+            createdBy: email,
+            updatedBy: email,
+          }))
         })
       }
 
-      await this.em.persist(fosterApplication).flush();  
-      return await this.findOnePetFoster(fosterApplication.id);
+      if(isFoster) {
+        await this.fosterApplicationsRepository.getEntityManager().persistAndFlush(application);
+        return this.findOnePetFoster(application.id);
+      } else {
+        await this.adoptApplicationsRepository.getEntityManager().persistAndFlush(application);
+        return this.findOnePetAdopt(application.id);
+      }
     } catch(e) {
-
+      console.error(e);
+      throw e;
     }
   }
 
   findOnePetFoster(id: number) {
-    return this.em.findOneOrFail(FosterApplications, id, {
-      populate:[
-        'petType',
-        'houseOwnershipType',
-        'householdType',
-        'referenceInfo',
-        'householdInfo',
-        'householdInfo.householdMemberType'
-      ]
-    })
+    try {
+      return this.fosterApplicationsRepository.findOneOrFail(id, {
+        populate:[
+          'petType',
+          'houseOwnershipType',
+          'householdType',
+          'referenceInfo',
+          'householdInfo',
+          'householdInfo.householdMemberType'
+        ]
+      })
+    } catch(e) {
+      console.error(e);
+      throw e;
+    }
   }
 
-  // async createHouseholdInfo(createApplicantHouseholdDto: CreateApplicantsHouseholdInfoDto) {
-  //   try {
-  //     const applicantHousehold = new ApplicantsHouseholdInfo(createApplicantHouseholdDto);
-  //     await this.em.persist(applicantHousehold).flush();
-  //     return applicantHousehold;
-  //   } catch(e) {
-  //     return e
-  //   }
-  // }
-
-  // async createChildrenInfo(createApplicantChildrenInfoDto: CreateApplicantsHouseholdInfoDto) {
-  //   try {
-  //     const applicantChildrenInfo = new ApplicantsChildrenInfo(createApplicantChildrenInfoDto);
-  //     await this.em.persist(applicantChildrenInfo).flush();
-  //     return applicantChildrenInfo;
-  //   } catch(e) {
-  //     return e
-  //   }
-  // }
-
-  // async createPetsInfo(createApplicantsPetsInfoDto: CreateApplicantsPetsInfoDto) {
-  //   try {
-  //     const applicantsPetsInfo = new ApplicantsPetsInfo(createApplicantsPetsInfoDto);
-  //     await this.em.persist(applicantsPetsInfo).flush();
-  //     return applicantsPetsInfo;
-  //   } catch(e) {
-  //     return e
-  //   }
-  // }
-
-  // async createReferencesInfo(createApplicantsReferencesInfoDto: CreateApplicantsReferencesInfoDto) {
-  //   try {
-  //     const applicantsReferencesInfo = new ApplicantsReferencesInfo(createApplicantsReferencesInfoDto);
-  //     await this.em.persist(applicantsReferencesInfo).flush();
-  //     return applicantsReferencesInfo;
-  //   } catch(e) {
-  //     return e
-  //   }
-  // }
-
-  findAll() {
-    return `This action returns all forms`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} form`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} form`;
+  findOnePetAdopt(id: number) {
+    try {
+      return this.adoptApplicationsRepository.findOneOrFail(id, {
+        populate:[
+          'houseOwnershipType',
+          'householdType',
+          'referenceInfo',
+          'householdInfo',
+          'householdInfo.householdMemberType'
+        ]
+      })
+    } catch(e) {
+      console.error(e);
+      throw e;
+    }
   }
 }

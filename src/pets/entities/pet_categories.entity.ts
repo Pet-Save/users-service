@@ -4,7 +4,7 @@ import { FosterApplications } from "../../forms/entities/applications/foster-app
 
 export enum PET_CATEGORY {
     DOG = 'dog',
-    CAT = 'CAT'
+    CAT = 'cat'
 }
 
 @Entity()

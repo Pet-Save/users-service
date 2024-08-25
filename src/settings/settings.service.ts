@@ -1,43 +1,55 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateTimeSessionDto } from './dto/create-time-session.dto';
-import { EntityManager, IDatabaseDriver, Connection, MikroORM } from '@mikro-orm/core';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { TimeOfADay } from './entities/time-of-a-day.entity';
+import { MikroORM } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository, } from '@mikro-orm/postgresql';
+import { Injectable } from '@nestjs/common';
 import { DayOfAWeek } from './entities/day-of-a-week.entity';
+import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
 import { HouseholdMemberTypes } from './entities/household-member-type.entity';
 import { HouseholdTypes } from './entities/household-types.entity';
-import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
+import { TimeOfADay } from './entities/time-of-a-day.entity';
 
 @Injectable()
-export class SettingsService {
-  em: EntityManager<IDatabaseDriver<Connection>>;
+export class SettingsService {  
   constructor(
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
     private readonly orm: MikroORM,
+    @InjectRepository(TimeOfADay)
+    private readonly timeOfADayRepository: EntityRepository<TimeOfADay>,
+    @InjectRepository(DayOfAWeek)
+    private readonly dayOfAWeekRepository: EntityRepository<DayOfAWeek>,
+    @InjectRepository(HouseholdTypes)
+    private readonly householdTypesRepository: EntityRepository<HouseholdTypes>,
+    @InjectRepository(HouseOwnershipTypes)
+    private readonly houseOwnershipTypesRepository: EntityRepository<HouseOwnershipTypes>,
+    @InjectRepository(HouseholdMemberTypes)
+    private readonly householdMemberTypesRepository: EntityRepository<HouseholdMemberTypes>,
   ) {
-    this.em = this.orm.em.fork();
+    const forkedEm = this.orm.em.fork();
+    this.timeOfADayRepository = forkedEm.getRepository(TimeOfADay);
+    this.dayOfAWeekRepository = forkedEm.getRepository(DayOfAWeek);
+    this.householdTypesRepository = forkedEm.getRepository(HouseholdTypes);
+    this.houseOwnershipTypesRepository = forkedEm.getRepository(HouseOwnershipTypes);
+    this.householdMemberTypesRepository = forkedEm.getRepository(HouseholdMemberTypes);
   }
 
+
   getAllTimeOfADay() {
-    return this.em.findAll(TimeOfADay);
+    return this.timeOfADayRepository.findAll();
   }
 
   getAllDayOfAWeek() {
-    return this.em.findAll(DayOfAWeek);
+    return this.dayOfAWeekRepository.findAll();
   }
 
   getAllHouseholdTypes() {
-    return this.em.findAll(HouseholdTypes);
+    return this.householdTypesRepository.findAll();
   }
 
   getAllHouseOwnershipTypes() {
-    return this.em.findAll(HouseOwnershipTypes);
+    return this.houseOwnershipTypesRepository.findAll();
   }
 
   getAllHouseholdMemberTypes() {
-    return this.em.findAll(HouseholdMemberTypes);
+    return this.householdMemberTypesRepository.findAll();
   }
 
 }

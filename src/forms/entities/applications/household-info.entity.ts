@@ -23,23 +23,4 @@ export class HouseholdInfo extends BaseEntity {
 
     @ManyToOne()
     householdMemberType: HouseholdMemberTypes
-
-    constructor(
-        age: number,
-        householdMemberType: HouseholdMemberTypes,
-        application: FosterApplications | AdoptApplications,
-        name?: string,
-        occupation?: string
-    ) {
-        super();
-        this.age = age;
-        this.householdMemberType = householdMemberType;
-        if(application instanceof FosterApplications) {
-            this.fosterApplication = application;
-        } else {
-            this.adoptApplication = application;
-        }
-        if(name) this.name = name;
-        if(occupation) this.occupation = occupation;
-    }
 }

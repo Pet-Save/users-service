@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PetsService } from './pets.service';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
-import { UpdatePetDto } from './dto/update-pet.dto';
-import { CreatePetDto } from './dto/create-pet.dto';
 import { CreatePetImageDto } from './dto/create-pet-image.dto';
+import { CreatePetDto } from './dto/create-pet.dto';
+import { PetsService } from './pets.service';
 
 @Controller('pets')
 export class PetsController {
