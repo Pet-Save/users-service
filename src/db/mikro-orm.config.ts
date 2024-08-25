@@ -47,14 +47,14 @@ const config = defineConfig({
     emit: 'ts', // migration generation mode
     generator: TSMigrationGenerator, // migration generator, e.g. to allow custom formatting
   },
-  seeder: {
+  seeder: process.env.ENV === 'local' ? {
     path: Utils.detectTsNode() ? './src/db/seeders' : './dist/db/seeders', // path to the folder with migrations
     pathTs: undefined, // path to the folder with TS seeders (if used, we should put path to compiled files in `path`)
     defaultSeeder: 'DatabaseSeeder', // default seeder class name
     glob: '!(*.d).{js,ts}', // how to match seeder files (all .js and .ts files, but not .d.ts)
     emit: 'ts', // seeder generation mode
     fileName: (className: string) => `${className}.seeder.ts`, // seeder file naming convention
-  },
+  } : undefined,
 });
 
 export default registerAs('mikroOrm', () => config)
