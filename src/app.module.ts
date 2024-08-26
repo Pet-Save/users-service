@@ -9,6 +9,7 @@ import { SettingsModule } from './settings/settings.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { PetsModule } from './pets/pets.module';
 import { HealthModule } from './health/health.module';
+import { AwsModule } from './aws/aws.module';
 
 
 @Module({
@@ -29,6 +30,7 @@ import { HealthModule } from './health/health.module';
     SettingsModule,
     PetsModule,
     HealthModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

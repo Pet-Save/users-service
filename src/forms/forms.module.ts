@@ -13,6 +13,7 @@ import { AdoptApplications } from './entities/applications/adopt-applications.en
 import { PetsModule } from '../pets/pets.module';
 import { ReferenceInfo } from './entities/applications/reference-info.entity';
 import { HouseholdInfo } from './entities/applications/household-info.entity';
+import { AwsModule } from '../aws/aws.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { HouseholdInfo } from './entities/applications/household-info.entity';
     ]),
     SettingsModule,
     PetsModule,
+    AwsModule,
   ],
   controllers: [FormsController],
   providers: [FormsService],

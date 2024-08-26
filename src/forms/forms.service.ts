@@ -17,12 +17,14 @@ import { ReferenceInfo } from './entities/applications/reference-info.entity';
 import { ContactUsMessages } from './entities/contact-us-messages.entity';
 import { VolunteerAvailabilities } from './entities/volunteers/volunteer-availabilities.entity';
 import { Volunteers } from './entities/volunteers/volunteers.entity';
+import { SesService } from '../aws/ses/ses.service';
 
 @Injectable()
 export class FormsService {
   constructor(
     private readonly settingsService: SettingsService,
     private readonly petsService: PetsService,
+    private readonly sesService: SesService,
 
     private readonly orm: MikroORM,
     @InjectRepository(ContactUsMessages)
@@ -66,6 +68,13 @@ export class FormsService {
         createdBy: createContactUsFormDto.email,
         updatedBy: createContactUsFormDto.email
       })
+      await this.sesService.sendEmail(
+        `New Incoming Contact Us Message From ${createContactUsFormDto.email}`,
+        `${createContactUsFormDto.firstName} ${createContactUsFormDto.lastName} has sent a message to us:\n\n
+        ${createContactUsFormDto.message}\n
+        reply to ${createContactUsFormDto.email} if interested.
+        `
+      );
       await this.contactUsMessagesRepository.getEntityManager().flush();
       return message
     } catch(e) {
