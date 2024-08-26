@@ -1,5 +1,4 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { DayOfAWeek } from './entities/day-of-a-week.entity';
 import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
@@ -19,7 +18,6 @@ import { SettingsService } from './settings.service';
       HouseOwnershipTypes,
       HouseholdMemberTypes,
     ]),
-    CacheModule.register()
   ],
   controllers: [SettingsController],
   providers: [SettingsService],
@@ -27,4 +25,4 @@ import { SettingsService } from './settings.service';
     SettingsService,
   ]
 })
-export class SettingsModule {}
+export class SettingsModule { }

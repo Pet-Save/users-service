@@ -9,7 +9,7 @@ import { config as dotenvConfig } from 'dotenv';
 
 dotenvConfig({ path: '.env' });
 
-const config = defineConfig({
+export const config = defineConfig({
   host: process.env.DB_HOST,
   port: +`${process.env.DB_PORT}`,
   user: `${process.env.DB_USERNAME}`,
