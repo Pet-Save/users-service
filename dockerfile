@@ -9,6 +9,7 @@ COPY package.json ./
 COPY yarn.lock ./
 
 # Install app dependencies
+RUN apk --no-cache add curl
 RUN yarn
 
 # Bundle app source
