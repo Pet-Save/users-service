@@ -14,9 +14,10 @@ export class HealthController {
   @HealthCheck()
   check() {
     console.log('hitting health check route')
-    return this.health.check([
+    this.health.check([
         () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
         () => this.db.pingCheck('database'),
     ]);
+    return 'ok'
   }
 }
