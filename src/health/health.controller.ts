@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 import { HealthCheckService, HttpHealthIndicator, HealthCheck, MikroOrmHealthIndicator } from '@nestjs/terminus';
 
 @Controller('health')
@@ -11,6 +11,7 @@ export class HealthController {
   ) {}
 
   @Get()
+  @HttpCode(200)
   @HealthCheck()
   check() {
     console.log('hitting health check route')
