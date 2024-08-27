@@ -1,10 +1,11 @@
 import { Collection, Entity, ManyToOne, OneToMany, Opt, Property } from "@mikro-orm/core";
 import { BaseEntity } from "../../db/base.entity";
-import { PetCategories } from "./pet_categories.entity";
+import { PetCategories } from "./pet-categories.entity";
 import { Gender } from "../../settings/entities/gender.entity";
-import { PetImages } from "./pet_images.entity";
+import { PetImages } from "./pet-images.entity";
+import { PetsRepository } from "../repositories/pets.repository";
 
-@Entity()
+@Entity({ repository: () => PetsRepository })
 export class Pets extends BaseEntity {
     @Property({ length: 100 })
     name: string;

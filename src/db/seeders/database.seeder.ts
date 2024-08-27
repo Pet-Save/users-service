@@ -7,7 +7,7 @@ import { HouseholdMemberTypes } from '../../settings/entities/household-member-t
 import { HouseholdTypes } from '../../settings/entities/household-types.entity';
 import { HouseOwnershipTypes } from '../../settings/entities/house-ownership-types.entity';
 import { UserTypes } from '../../settings/entities/user-types.entity';
-import { PET_CATEGORY, PetCategories } from '../../pets/entities/pet_categories.entity';
+import { PET_CATEGORY, PetCategories } from '../../pets/entities/pet-categories.entity';
 import { DAY, TIME } from '../../forms/dto/create-volunteer.dto';
 import { HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from '../../forms/dto/create-application.dto';
 

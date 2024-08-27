@@ -1,38 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { SettingsService } from '../settings/settings.service';
 import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
-import { MikroORM } from '@mikro-orm/core';
-import { PetCategories } from './entities/pet_categories.entity';
 import { CreatePetDto } from './dto/create-pet.dto';
-import { Gender } from '../settings/entities/gender.entity';
 import { Pets } from './entities/pets.entity';
-import { PetImages } from './entities/pet_images.entity';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { PetCategoriesRepository } from './repositories/pet-categories.repository';
+import { PetImagesRepository } from './repositories/pet-images.repository';
+import { PetsRepository } from './repositories/pets.repository';
 
 @Injectable()
 export class PetsService {
   constructor(
-    private readonly orm: MikroORM,
-    @InjectRepository(PetCategories)
-    private readonly petCategoriesRepository: EntityRepository<PetCategories>,
-    @InjectRepository(Gender)
-    private readonly genderRepository: EntityRepository<Gender>,
-    @InjectRepository(Pets)
-    private readonly petsRepository: EntityRepository<Pets>,
-    @InjectRepository(PetImages)
-    private readonly petImagesRepository: EntityRepository<PetImages>,
-  ) {
-    const forkedEm = this.orm.em.fork();
-    this.petCategoriesRepository = forkedEm.getRepository(PetCategories);
-    this.genderRepository = forkedEm.getRepository(Gender);
-    this.petsRepository = forkedEm.getRepository(Pets);
-    this.petImagesRepository = forkedEm.getRepository(PetImages);
-  }
+    private readonly settingsService: SettingsService,
+    private readonly petCategoriesRepository: PetCategoriesRepository,
+    private readonly petsRepository: PetsRepository,
+    private readonly petImagesRepository: PetImagesRepository,
+  ) {}
 
   async createPet(createPetDto: CreatePetDto) {
     try {
       const petCategory = await this.findOnePetCategory(createPetDto.categoryId);
-      const gender = await this.genderRepository.findOneOrFail(createPetDto.genderId);
+      const gender = await this.settingsService.findOneGender(createPetDto.genderId);
       const pet = this.petsRepository.create({
         name: createPetDto.name,
         petCategory,
@@ -95,6 +82,4 @@ export class PetsService {
       id: { $in: ids }
     });
   }
-
-
 }
