@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "npx mikro-orm migration:up && node dist/main",
+    "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -107,8 +107,10 @@
     "testEnvironment": "node"
   },
   "mikro-orm": {
+    "useTsNode": true,
     "configPaths": [
-      "./src/db/mikro-orm.config.ts"
+      "./src/db/mikro-orm.config.ts",
+      "./dist/db/mikro-orm.config.js"
     ]
   }
 }

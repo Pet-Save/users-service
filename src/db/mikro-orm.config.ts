@@ -4,12 +4,11 @@ import { UnderscoreNamingStrategy, Utils, defineConfig } from "@mikro-orm/postgr
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { SeedManager } from "@mikro-orm/seeder";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
-import { registerAs } from "@nestjs/config";
 import { config as dotenvConfig } from 'dotenv';
 
 dotenvConfig({ path: '.env' });
 
-export const config = defineConfig({
+export default defineConfig({
   host: process.env.DB_HOST,
   port: +`${process.env.DB_PORT}`,
   user: `${process.env.DB_USERNAME}`,
@@ -56,5 +55,3 @@ export const config = defineConfig({
     fileName: (className: string) => `${className}.seeder.ts`, // seeder file naming convention
   } : undefined,
 });
-
-export default registerAs('mikroOrm', () => config)
