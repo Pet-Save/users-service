@@ -1,16 +1,15 @@
-import { Module, NestModule, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { MikroORM } from '@mikro-orm/postgresql';
+import { CacheModule } from '@nestjs/cache-manager';
+import { Module, NestModule, OnApplicationBootstrap } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { FormsModule } from './forms/forms.module';
-// import mikroOrm from './db/mikro-orm.config.js';
-import { MikroOrmModule, MikroOrmModuleOptions } from '@mikro-orm/nestjs';
-import { SettingsModule } from './settings/settings.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { PetsModule } from './pets/pets.module';
-import { HealthModule } from './health/health.module';
 import { AwsModule } from './aws/aws.module';
-import { MikroORM } from '@mikro-orm/postgresql';
+import { FormsModule } from './forms/forms.module';
+import { HealthModule } from './health/health.module';
+import { PetsModule } from './pets/pets.module';
+import { SettingsModule } from './settings/settings.module';
 
 
 @Module({

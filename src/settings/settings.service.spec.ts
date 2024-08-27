@@ -1,18 +1,11 @@
+import { EntityManager } from '@mikro-orm/postgresql';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SettingsService } from './settings.service';
-import { getRepositoryToken, MikroOrmModule } from '@mikro-orm/nestjs';
-import { TimeOfADay } from './entities/time-of-a-day.entity';
-import { DayOfAWeek } from './entities/day-of-a-week.entity';
-import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
-import { HouseholdMemberTypes } from './entities/household-member-type.entity';
-import { HouseholdTypes } from './entities/household-types.entity';
-import { EntityManager, EntityRepository, PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { SettingsController } from './settings.controller';
-import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
 import { DayOfAWeekRepository } from './repositories/day-of-a-week.repository';
-import { HouseholdTypesRepository } from './repositories/household-types.repository';
-import { HouseholdMemberTypesRepository } from './repositories/household-member-type.repository';
 import { HouseOwnershipTypesRepository } from './repositories/house-ownership-types.repository';
+import { HouseholdMemberTypesRepository } from './repositories/household-member-type.repository';
+import { HouseholdTypesRepository } from './repositories/household-types.repository';
+import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
+import { SettingsService } from './settings.service';
 
 describe('SettingsService', () => {
   let service: SettingsService;
