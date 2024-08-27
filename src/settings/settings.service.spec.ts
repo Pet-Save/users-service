@@ -71,4 +71,34 @@ describe('SettingsService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('TimeOfADayRepository', () => {
+    it('should return all TimeOfADay', async () => {
+      expect(await service.getAllTimeOfADay()).toStrictEqual([]);
+    });
+  })
+
+  describe('DayOfAWeekRepository', () => {
+    it('should return all DayOfAWeek', async () => {
+      expect(await service.getAllDayOfAWeek()).toStrictEqual([]);
+    });
+  })
+
+  describe('HouseholdTypesRepository', () => {
+    it('should return all HouseholdTypes', async () => {
+      expect(await service.getAllHouseholdTypes()).toStrictEqual([]);
+    });
+  })
+
+  describe('HouseOwnershipTypesRepository', () => {
+    it('should return all HouseOwnershipTypes', async () => {
+      expect(await service.getAllHouseOwnershipTypes()).toStrictEqual([]);
+    });
+  })
+
+  describe('HouseholdMemberTypesRepository', () => {
+    it('should return all HouseholdMemberTypes', async () => {
+      expect(await service.getAllHouseholdMemberTypes()).toStrictEqual([]);
+    });
+  })
 });

@@ -33,7 +33,7 @@ describe('SettingsController', () => {
   });
 
   describe('GET/time-of-a-day', () => {
-    it('should return 200  status', async () => {
+    it('should return 200 status', async () => {
       const mockValue: [] = [];
 
       const spy = jest.spyOn(service, 'getAllTimeOfADay');
@@ -46,7 +46,7 @@ describe('SettingsController', () => {
   })
 
   describe('GET/day-of-a-week', () => {
-    it('should return 200  status', async () => {
+    it('should return 200 status', async () => {
       const mockValue: [] = [];
 
       const spy = jest.spyOn(service, 'getAllDayOfAWeek');
@@ -59,7 +59,7 @@ describe('SettingsController', () => {
   })
 
   describe('GET/household-types', () => {
-    it('should return 200  status', async () => {
+    it('should return 200 status', async () => {
       const mockValue: [] = [];
 
       const spy = jest.spyOn(service, 'getAllHouseholdTypes');
@@ -72,7 +72,7 @@ describe('SettingsController', () => {
   })
 
   describe('GET/house-ownership-types', () => {
-    it('should return 200  status', async () => {
+    it('should return 200 status', async () => {
       const mockValue: [] = [];
 
       const spy = jest.spyOn(service, 'getAllHouseOwnershipTypes');
@@ -85,7 +85,7 @@ describe('SettingsController', () => {
   })
 
   describe('GET/household-member-types', () => {
-    it('should return 200  status', async () => {
+    it('should return 200 status', async () => {
       const mockValue: [] = [];
 
       const spy = jest.spyOn(service, 'getAllHouseholdMemberTypes');
