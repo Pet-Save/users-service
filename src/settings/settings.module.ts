@@ -11,13 +11,15 @@ import { SettingsService } from './settings.service';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([
-      TimeOfADay,
-      DayOfAWeek,
-      HouseholdTypes,
-      HouseOwnershipTypes,
-      HouseholdMemberTypes,
-    ]),
+    MikroOrmModule.forFeature({
+      entities: [
+        TimeOfADay,
+        DayOfAWeek,
+        HouseholdTypes,
+        HouseOwnershipTypes,
+        HouseholdMemberTypes,
+      ]
+    }),
   ],
   controllers: [SettingsController],
   providers: [SettingsService],

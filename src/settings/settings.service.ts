@@ -6,29 +6,21 @@ import { HouseOwnershipTypes } from './entities/house-ownership-types.entity';
 import { HouseholdMemberTypes } from './entities/household-member-type.entity';
 import { HouseholdTypes } from './entities/household-types.entity';
 import { TimeOfADay } from './entities/time-of-a-day.entity';
+import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
+import { DayOfAWeekRepository } from './repositories/day-of-a-week.repository';
+import { HouseholdTypesRepository } from './repositories/household-types.repository';
+import { HouseholdMemberTypesRepository } from './repositories/household-member-type.repository';
+import { HouseOwnershipTypesRepository } from './repositories/house-ownership-types.repository';
 
 @Injectable()
 export class SettingsService {  
   constructor(
-    private readonly em: EntityManager,
-    @InjectRepository(TimeOfADay)
-    private readonly timeOfADayRepository: EntityRepository<TimeOfADay>,
-    @InjectRepository(DayOfAWeek)
-    private readonly dayOfAWeekRepository: EntityRepository<DayOfAWeek>,
-    @InjectRepository(HouseholdTypes)
-    private readonly householdTypesRepository: EntityRepository<HouseholdTypes>,
-    @InjectRepository(HouseOwnershipTypes)
-    private readonly houseOwnershipTypesRepository: EntityRepository<HouseOwnershipTypes>,
-    @InjectRepository(HouseholdMemberTypes)
-    private readonly householdMemberTypesRepository: EntityRepository<HouseholdMemberTypes>,
-  ) {
-    const forkedEm = this.em.fork();
-    this.timeOfADayRepository = forkedEm.getRepository(TimeOfADay);
-    this.dayOfAWeekRepository = forkedEm.getRepository(DayOfAWeek);
-    this.householdTypesRepository = forkedEm.getRepository(HouseholdTypes);
-    this.houseOwnershipTypesRepository = forkedEm.getRepository(HouseOwnershipTypes);
-    this.householdMemberTypesRepository = forkedEm.getRepository(HouseholdMemberTypes);
-  }
+    private readonly timeOfADayRepository: TimeOfADayRepository,
+    private readonly dayOfAWeekRepository: DayOfAWeekRepository,
+    private readonly householdTypesRepository: HouseholdTypesRepository,
+    private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
+    private readonly householdMemberTypesRepository: HouseholdMemberTypesRepository,
+  ) {}
 
 
   getAllTimeOfADay() {
