@@ -1,4 +1,4 @@
-import { BadGatewayException, Controller, Get } from '@nestjs/common';
+import { BadGatewayException, Controller, Get, Param } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 
 @Controller('settings')
@@ -45,6 +45,15 @@ export class SettingsController {
   getAllHouseholdMemberTypes() {
     try {
       return this.settingsService.getAllHouseholdMemberTypes();
+    } catch (e) {
+      return new BadGatewayException(e);
+    }
+  }
+
+  @Get('gender/:id')
+  findOneGender(@Param('id') id: number) {
+    try {
+      return this.settingsService.findOneGender(id);
     } catch (e) {
       return new BadGatewayException(e);
     }

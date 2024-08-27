@@ -4,6 +4,7 @@ import { HouseOwnershipTypesRepository } from './repositories/house-ownership-ty
 import { HouseholdMemberTypesRepository } from './repositories/household-member-type.repository';
 import { HouseholdTypesRepository } from './repositories/household-types.repository';
 import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
+import { GenderRepository } from './repositories/gender.repository';
 
 @Injectable()
 export class SettingsService {  
@@ -13,6 +14,7 @@ export class SettingsService {
     private readonly householdTypesRepository: HouseholdTypesRepository,
     private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
     private readonly householdMemberTypesRepository: HouseholdMemberTypesRepository,
+    private readonly genderRepository: GenderRepository,
   ) {}
 
 
@@ -36,4 +38,11 @@ export class SettingsService {
     return this.householdMemberTypesRepository.findAll();
   }
 
+  findOneGender(id: number) {
+    try {
+      return this.genderRepository.findOneOrFail(id)
+    } catch(e) {
+      throw e
+    }
+  }
 }
