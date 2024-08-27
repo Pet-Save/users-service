@@ -1,4 +1,3 @@
-import { EntityManager } from '@mikro-orm/postgresql';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DayOfAWeekRepository } from './repositories/day-of-a-week.repository';
 import { HouseOwnershipTypesRepository } from './repositories/house-ownership-types.repository';
@@ -45,10 +44,6 @@ describe('SettingsService', () => {
   const module: TestingModule = await Test.createTestingModule({
     providers: [
       SettingsService,
-      {
-        provide: EntityManager,
-        useValue: mockEntityManager,
-      },
       {
         provide: TimeOfADayRepository,
         useValue: mockTimeOfADayRepository,
