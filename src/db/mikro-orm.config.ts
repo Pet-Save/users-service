@@ -4,9 +4,11 @@ import { UnderscoreNamingStrategy, Utils, defineConfig } from "@mikro-orm/postgr
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { SeedManager } from "@mikro-orm/seeder";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
+import { Logger } from "@nestjs/common";
 import { config as dotenvConfig } from 'dotenv';
 
 dotenvConfig({ path: '.env' });
+const logger = new Logger('MikroORM');
 
 export default defineConfig({
   host: process.env.DB_HOST,
@@ -18,6 +20,7 @@ export default defineConfig({
   entitiesTs: ['src/**/*.entity.ts'],
   debug: true,
   highlighter: new SqlHighlighter(),
+  logger: logger.log.bind(logger),
   metadataProvider: TsMorphMetadataProvider,
   metadataCache: {
     pretty: true,
