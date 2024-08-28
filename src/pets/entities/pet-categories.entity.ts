@@ -14,5 +14,5 @@ export class PetCategories extends BaseEntity {
     value: string;
 
     @ManyToMany(() => FosterApplications, fosterApplications => fosterApplications.petType)
-    fosterApplciation = new Collection<FosterApplications>(this);
+    fosterApplciation ?= new Collection<FosterApplications>(this);
 }
