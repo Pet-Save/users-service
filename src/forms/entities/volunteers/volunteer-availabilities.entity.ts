@@ -1,10 +1,11 @@
-import { DecimalType, Entity, ManyToOne, Property, SmallIntType, TextType } from "@mikro-orm/core";
+import { Entity, ManyToOne } from "@mikro-orm/core";
 import { BaseEntity } from "../../../db/base.entity";
 import { DayOfAWeek } from "../../../settings/entities/day-of-a-week.entity";
 import { TimeOfADay } from "../../../settings/entities/time-of-a-day.entity";
+import { VolunteerAvailabilitiesRepository } from "../../repositories/volunteers/volunteer-availabilities.repository";
 import { Volunteers } from "./volunteers.entity";
 
-@Entity()
+@Entity({ repository: () => VolunteerAvailabilitiesRepository })
 export class VolunteerAvailabilities extends BaseEntity {
     @ManyToOne({
         lazy: true

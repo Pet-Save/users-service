@@ -5,8 +5,9 @@ import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-
 import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
 import { PetCategories } from "../../../pets/entities/pet-categories.entity";
+import { FosterApplicationsRepository } from "../../repositories/applications/foster-applications.repository";
 
-@Entity()
+@Entity({ repository: () => FosterApplicationsRepository })
 export class FosterApplications extends BaseEntity {
     @Property({ length: 20 })
     firstName: string;

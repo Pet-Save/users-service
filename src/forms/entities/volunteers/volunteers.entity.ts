@@ -1,8 +1,9 @@
 import { Collection, DecimalType, Entity, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
 import { BaseEntity } from "../../../db/base.entity";
 import { VolunteerAvailabilities } from "./volunteer-availabilities.entity";
+import { VolunteersRepository } from "../../repositories/volunteers/volunteers.repository";
 
-@Entity()
+@Entity({ repository: () => VolunteersRepository })
 export class Volunteers extends BaseEntity {
     @Property({ length: 20 })
     firstName: string;

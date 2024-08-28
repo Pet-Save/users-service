@@ -3,8 +3,9 @@ import { HouseholdMemberTypes } from "../../../settings/entities/household-membe
 import { FosterApplications } from "./foster-applications.entity";
 import { AdoptApplications } from "./adopt-applications.entity";
 import { BaseEntity } from "../../../db/base.entity";
+import { HouseholdInfoRepository } from "../../repositories/applications/household-info.repository";
 
-@Entity()
+@Entity({ repository: () => HouseholdInfoRepository })
 export class HouseholdInfo extends BaseEntity {
     @Property({ type: SmallIntType })
     age: number;

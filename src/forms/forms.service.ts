@@ -1,23 +1,23 @@
-import { MikroORM } from '@mikro-orm/core';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
+import { SesService } from '../aws/ses/ses.service';
 import mapByKey from '../common/mapByKey';
 import { PetsService } from '../pets/pets.service';
-import { HouseOwnershipTypes } from '../settings/entities/house-ownership-types.entity';
-import { HouseholdTypes } from '../settings/entities/household-types.entity';
+import { HouseOwnershipTypesRepository } from '../settings/repositories/house-ownership-types.repository';
+import { HouseholdTypesRepository } from '../settings/repositories/household-types.repository';
 import { SettingsService } from '../settings/settings.service';
 import { CreateApplicationDto, HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from './dto/create-application.dto';
 import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
 import { CreateVolunteerDto } from './dto/create-volunteer.dto';
 import { AdoptApplications } from './entities/applications/adopt-applications.entity';
 import { FosterApplications } from './entities/applications/foster-applications.entity';
-import { HouseholdInfo } from './entities/applications/household-info.entity';
-import { ReferenceInfo } from './entities/applications/reference-info.entity';
-import { ContactUsMessages } from './entities/contact-us-messages.entity';
-import { VolunteerAvailabilities } from './entities/volunteers/volunteer-availabilities.entity';
-import { Volunteers } from './entities/volunteers/volunteers.entity';
-import { SesService } from '../aws/ses/ses.service';
+import { AdoptApplicationsRepository } from './repositories/applications/adopt-applications.repository';
+import { FosterApplicationsRepository } from './repositories/applications/foster-applications.repository';
+import { HouseholdInfoRepository } from './repositories/applications/household-info.repository';
+import { ReferenceInfoRepository } from './repositories/applications/reference-info.repository';
+import { ContactUsMessagesRepository } from './repositories/contact-us-messages.repository';
+import { VolunteerAvailabilitiesRepository } from './repositories/volunteers/volunteer-availabilities.repository';
+import { VolunteersRepository } from './repositories/volunteers/volunteers.repository';
 
 @Injectable()
 export class FormsService {
@@ -25,40 +25,17 @@ export class FormsService {
     private readonly settingsService: SettingsService,
     private readonly petsService: PetsService,
     private readonly sesService: SesService,
-
-    private readonly orm: MikroORM,
-    @InjectRepository(ContactUsMessages)
-    private readonly contactUsMessagesRepository: EntityRepository<ContactUsMessages>,
-    @InjectRepository(Volunteers)
-    private readonly volunteersRepository: EntityRepository<Volunteers>,
-    @InjectRepository(VolunteerAvailabilities)
-    private readonly volunteerAvailabilitiesRepository: EntityRepository<VolunteerAvailabilities>,
-    @InjectRepository(FosterApplications)
-    private readonly fosterApplicationsRepository: EntityRepository<FosterApplications>,
-    @InjectRepository(AdoptApplications)
-    private readonly adoptApplicationsRepository: EntityRepository<AdoptApplications>,
-    @InjectRepository(HouseholdTypes)
-    private readonly householdTypesRepository: EntityRepository<HouseholdTypes>,
-    @InjectRepository(HouseholdInfo)
-    private readonly householdInfoRepository: EntityRepository<HouseholdInfo>,
-    @InjectRepository(HouseOwnershipTypes)
-    private readonly houseOwnershipTypesRepository: EntityRepository<HouseOwnershipTypes>,
-    @InjectRepository(ReferenceInfo)
-    private readonly referenceInfoRepository: EntityRepository<ReferenceInfo>,
-
-  ) {
-    const forkedEm = this.orm.em.fork();
-    this.contactUsMessagesRepository = forkedEm.getRepository(ContactUsMessages);
-    this.volunteersRepository = forkedEm.getRepository(Volunteers);
-    this.volunteerAvailabilitiesRepository = forkedEm.getRepository(VolunteerAvailabilities);
-    this.fosterApplicationsRepository = forkedEm.getRepository(FosterApplications);
-    this.adoptApplicationsRepository = forkedEm.getRepository(AdoptApplications);
-    this.householdTypesRepository = forkedEm.getRepository(HouseholdTypes);
-    this.householdInfoRepository = forkedEm.getRepository(HouseholdInfo);
-    this.houseOwnershipTypesRepository = forkedEm.getRepository(HouseOwnershipTypes);
-    this.referenceInfoRepository = forkedEm.getRepository(ReferenceInfo);
-
-  }
+    private readonly em: EntityManager,
+    private readonly contactUsMessagesRepository: ContactUsMessagesRepository,
+    private readonly volunteersRepository: VolunteersRepository,
+    private readonly volunteerAvailabilitiesRepository: VolunteerAvailabilitiesRepository,
+    private readonly adoptApplicationsRepository: AdoptApplicationsRepository,
+    private readonly fosterApplicationsRepository: FosterApplicationsRepository,
+    private readonly householdInfoRepository: HouseholdInfoRepository,
+    private readonly referenceInfoRepository: ReferenceInfoRepository,
+    private readonly householdTypesRepository: HouseholdTypesRepository,
+    private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
+  ) {}
 
   async createContactUs(createContactUsFormDto: CreateContactUsFormDto) {
     try {
@@ -74,7 +51,7 @@ export class FormsService {
         ${createContactUsFormDto.message}\n`
         + `reply to ${createContactUsFormDto.email} if interested.`
       );
-      await this.contactUsMessagesRepository.getEntityManager().flush();
+      await this.em.flush();
       return message
     } catch(e) {
       console.error(e)
@@ -120,7 +97,7 @@ export class FormsService {
         + `${availabilityString}\n\n`
         +`reply to ${email} if interested.`
       );
-      await this.volunteersRepository.getEntityManager().persistAndFlush(volunteer);
+      await this.em.persistAndFlush(volunteer);
       return volunteer;
     } catch(e) {
       throw e
@@ -261,11 +238,10 @@ export class FormsService {
         })
       }
 
+      await this.em.persistAndFlush(application);
       if(isFoster) {
-        await this.fosterApplicationsRepository.getEntityManager().persistAndFlush(application);
         return this.findOnePetFoster(application.id);
       } else {
-        await this.adoptApplicationsRepository.getEntityManager().persistAndFlush(application);
         return this.findOnePetAdopt(application.id);
       }
     } catch(e) {

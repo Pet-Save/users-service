@@ -4,8 +4,9 @@ import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-
 import { HouseholdTypes } from "../../../settings/entities/household-types.entity";
 import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
+import { AdoptApplicationsRepository } from "../../repositories/applications/adopt-applications.repository";
 
-@Entity()
+@Entity({ repository: () => AdoptApplicationsRepository })
 export class AdoptApplications extends BaseEntity {
     @Property({ length: 20 })
     firstName: string;
