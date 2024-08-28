@@ -14,7 +14,7 @@ export enum HOUSEHOLD_MEMBER_TYPE {
     PET = 'pet'    
 }
 
-class ReferenceInfo  {
+export class ReferenceInfo  {
     @IsString()
     @Length(1, 100)
     @IsNotEmpty()
