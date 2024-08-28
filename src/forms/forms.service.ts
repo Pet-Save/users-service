@@ -18,6 +18,7 @@ import { ReferenceInfoRepository } from './repositories/applications/reference-i
 import { ContactUsMessagesRepository } from './repositories/contact-us-messages.repository';
 import { VolunteerAvailabilitiesRepository } from './repositories/volunteers/volunteer-availabilities.repository';
 import { VolunteersRepository } from './repositories/volunteers/volunteers.repository';
+import { FosterFormBuilder, AdoptionFormBuilder } from './builder/form.builder';
 
 @Injectable()
 export class FormsService {
@@ -171,72 +172,24 @@ export class FormsService {
         updatedBy: email
       }
 
-      const application: FosterApplications | AdoptApplications = isFoster
-      ? this.fosterApplicationsRepository.create(dto)
-      : this.adoptApplicationsRepository.create(dto)
-      
-      if(isFoster) {
-        const petTypes = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
-        petTypes.forEach((petType) => {
-          (application as FosterApplications).petType.add(petType);
-        })
-      }
-      
-      referenceInfo.forEach(({ name, phoneNumber }) => {
-        application.referenceInfo.add(this.referenceInfoRepository.create({
-          name,
-          phoneNumber,
-          fosterApplication: isFoster ? application : null,
-          adoptApplication: !isFoster ? application : null,
-          createdBy: email,
-          updatedBy: email
-        }))
-      })
-
+      const builder = isFoster
+      ? new FosterFormBuilder(this.fosterApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository)
+      : new AdoptionFormBuilder(this.adoptApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository);
+      builder.setForm(dto);
+      builder.setReferenceInfo(referenceInfo);
       if(householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
-        householdMemberInfo.forEach(({ name, age, occupation }) => {
-            application.householdInfo.add(this.householdInfoRepository.create({
-              name,
-              age,
-              occupation,
-              householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT],
-              fosterApplication: isFoster ? application : null,
-              adoptApplication: !isFoster ? application : null,
-              createdBy: email,
-              updatedBy: email,
-            }))
-        })
+        builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT], householdMemberInfo)
       }
-
-      if(haveChildren) {
-        childrenInfo.forEach((age) => {
-          application.householdInfo.add(this.householdInfoRepository.create({
-            name: null,
-            age,
-            occupation: null,
-            householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD],
-            fosterApplication: isFoster ? application : null,
-            adoptApplication: !isFoster ? application : null,
-            createdBy: email,
-            updatedBy: email,
-          }))
-        })
-      }
-
-      if(havePetNow) {
-        petsInfo.forEach((age) => {
-          application.householdInfo.add(this.householdInfoRepository.create({
-            name: null,
-            age,
-            occupation: null,
-            householdMemberType: householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET],
-            fosterApplication: isFoster ? application : null,
-            adoptApplication: !isFoster ? application : null,
-            createdBy: email,
-            updatedBy: email,
-          }))
-        })
-      }
+      if (haveChildren) builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD], childrenInfo)
+      if (havePetNow) builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET], petsInfo)
+      const application = builder.getForm();
+    
+    if(isFoster) {
+      const petTypes = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
+      petTypes.forEach((petType) => {
+        (application as FosterApplications).petType.add(petType);
+      })
+    }
 
       await this.em.persistAndFlush(application);
       if(isFoster) {
