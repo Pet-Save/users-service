@@ -8,6 +8,7 @@ import { TimeOfADay } from './entities/time-of-a-day.entity';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
 import { Gender } from './entities/gender.entity';
+import { Status } from './entities/status.entity';
 
 
 @Module({
@@ -20,6 +21,7 @@ import { Gender } from './entities/gender.entity';
         HouseOwnershipTypes,
         HouseholdMemberTypes,
         Gender,
+        Status,
       ]
     }),
   ],

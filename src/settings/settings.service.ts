@@ -5,6 +5,7 @@ import { HouseholdMemberTypesRepository } from './repositories/household-member-
 import { HouseholdTypesRepository } from './repositories/household-types.repository';
 import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
 import { GenderRepository } from './repositories/gender.repository';
+import { StatusRepository } from './repositories/status.repository';
 
 @Injectable()
 export class SettingsService {  
@@ -15,6 +16,7 @@ export class SettingsService {
     private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
     private readonly householdMemberTypesRepository: HouseholdMemberTypesRepository,
     private readonly genderRepository: GenderRepository,
+    private readonly statusRepository: StatusRepository,
   ) {}
 
 
