@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
 import { CreatePetImageDto } from './dto/create-pet-image.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
@@ -25,5 +25,10 @@ export class PetsController {
   @Post()
   createPet(@Body() createPetDto: CreatePetDto) {
     return this.petsService.createPet(createPetDto);
+  }
+
+  @Get('/category/:id')
+  findOnePetCategory(@Param('id')id: number) {
+    return this.petsService.findOnePetCategory(id);
   }
 }

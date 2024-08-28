@@ -71,9 +71,8 @@ export class FormsService {
       await this.sesService.sendEmail(
         `New Incoming Contact Us Message From ${createContactUsFormDto.email}`,
         `${createContactUsFormDto.firstName} ${createContactUsFormDto.lastName} has sent a message to us:\n\n
-        ${createContactUsFormDto.message}\n
-        reply to ${createContactUsFormDto.email} if interested.
-        `
+        ${createContactUsFormDto.message}\n`
+        + `reply to ${createContactUsFormDto.email} if interested.`
       );
       await this.contactUsMessagesRepository.getEntityManager().flush();
       return message
@@ -96,19 +95,31 @@ export class FormsService {
         updatedBy: email
       })
 
+      let availabilityString = '';
       Object.entries(timetable)
         .filter(([, time]) => time)
         .forEach(([day, time]) => {
           const dayId = dayOfAWeek[day];
+          const temp = []
           for(const session of time) {
             volunteer.availabilities.add(this.volunteerAvailabilitiesRepository.create({
               dayOfAWeek: dayId,
               timeOfADay: timeOfADay[session],
               createdBy: email,
               updatedBy: email
-          }))
+            }))
+            temp.push(timeOfADay[session].value)
           }
+          availabilityString += `${dayId.value.toUpperCase()}: ${temp.join(', ')}\n`
         })
+      await this.sesService.sendEmail(
+        `New Volunteer Application`,
+        `${createVolunteerDto.firstName} ${createVolunteerDto.lastName} has applied as a new volunteer:\n\n`
+        + `${Object.entries({ email, ...remaining }).map(([key, value]) => `${key}: ${value}`).join('\n')}\n\n`
+        + 'Available Time:\n'
+        + `${availabilityString}\n\n`
+        +`reply to ${email} if interested.`
+      );
       await this.volunteersRepository.getEntityManager().persistAndFlush(volunteer);
       return volunteer;
     } catch(e) {

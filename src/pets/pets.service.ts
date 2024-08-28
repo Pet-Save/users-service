@@ -6,11 +6,13 @@ import { Pets } from './entities/pets.entity';
 import { PetCategoriesRepository } from './repositories/pet-categories.repository';
 import { PetImagesRepository } from './repositories/pet-images.repository';
 import { PetsRepository } from './repositories/pets.repository';
+import { EntityManager } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class PetsService {
   constructor(
     private readonly settingsService: SettingsService,
+    private readonly em: EntityManager,
     private readonly petCategoriesRepository: PetCategoriesRepository,
     private readonly petsRepository: PetsRepository,
     private readonly petImagesRepository: PetImagesRepository,
@@ -27,7 +29,7 @@ export class PetsService {
         createdBy: createPetDto.email,
         updatedBy: createPetDto.email
       })
-      await this.petsRepository.getEntityManager().persistAndFlush(pet)
+      await this.em.persistAndFlush(pet)
       return pet
     } catch(e) {
       console.error(e)
@@ -50,7 +52,7 @@ export class PetsService {
         pet.images.add(imageInstance);
         return imageInstance
       })
-      await this.petsRepository.getEntityManager().persistAndFlush(pet);
+      await this.em.persistAndFlush(pet);
       return images;
     } catch(e) {
       console.error(e)
@@ -65,7 +67,7 @@ export class PetsService {
         createdBy: createPetCategoryDto.email,
         updatedBy: createPetCategoryDto.email
       })
-      await this.petCategoriesRepository.getEntityManager().persistAndFlush(category);
+      await this.em.persistAndFlush(category);
       return category
     } catch(e) {
       console.error(e);
