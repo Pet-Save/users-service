@@ -79,6 +79,12 @@ export class PetsService {
     return this.petCategoriesRepository.findOneOrFail(id);
   }
 
+  findMultiplePet(ids: number[]) {
+    return this.petsRepository.find({
+      id: { $in: ids }
+    });
+  }
+
   findMultiplePetCategory(ids: number[]) {
     return this.petCategoriesRepository.find({
       id: { $in: ids }

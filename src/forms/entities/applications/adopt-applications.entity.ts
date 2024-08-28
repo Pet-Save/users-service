@@ -1,10 +1,12 @@
-import { Collection, DecimalType, Entity, ManyToMany, ManyToOne, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
+import { Collection, DecimalType, Entity, ManyToOne, OneToMany, Property, SmallIntType, TextType } from "@mikro-orm/core";
 import { BaseEntity } from "../../../db/base.entity";
+import { Pets } from "../../../pets/entities/pets.entity";
 import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-types.entity";
 import { HouseholdTypes } from "../../../settings/entities/household-types.entity";
+import { AdoptApplicationsRepository } from "../../repositories/applications/adopt-applications.repository";
+import { AdoptApplicationPet } from "../adopt-application-pet.entity";
 import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
-import { AdoptApplicationsRepository } from "../../repositories/applications/adopt-applications.repository";
 
 @Entity({ repository: () => AdoptApplicationsRepository })
 export class AdoptApplications extends BaseEntity {
@@ -89,6 +91,9 @@ export class AdoptApplications extends BaseEntity {
     @ManyToOne()
     houseOwnershipType: HouseOwnershipTypes
 
-    // @ManyToMany()
-    // petType = new Collection<PetCategories>(this);
+    @OneToMany(
+        () => AdoptApplicationPet,
+        adoptApplicationPet => adoptApplicationPet.adoptApplication
+    )
+    adoptRequest = new Collection<AdoptApplicationPet>(this);
 }

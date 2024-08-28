@@ -46,7 +46,7 @@ export class CreateApplicationDto {
     @IsOptional()
     @IsArray()
     @IsInt({ each: true })
-    adoptPet: string[]
+    adoptPetId: number[]
 
     @IsOptional()
     @IsArray()

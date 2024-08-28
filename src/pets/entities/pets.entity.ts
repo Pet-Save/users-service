@@ -4,6 +4,7 @@ import { PetCategories } from "./pet-categories.entity";
 import { Gender } from "../../settings/entities/gender.entity";
 import { PetImages } from "./pet-images.entity";
 import { PetsRepository } from "../repositories/pets.repository";
+import { AdoptApplicationPet } from "../../forms/entities/adopt-application-pet.entity";
 
 @Entity({ repository: () => PetsRepository })
 export class Pets extends BaseEntity {
@@ -27,4 +28,10 @@ export class Pets extends BaseEntity {
 
     @ManyToOne()
     petCategory: PetCategories
+
+    @OneToMany(
+        () => AdoptApplicationPet,
+        adoptApplicationPet => adoptApplicationPet.pet
+    )
+    adoptRequest = new Collection<AdoptApplicationPet>(this);
 }

@@ -6,6 +6,7 @@ import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
 import { PetCategories } from "../../../pets/entities/pet-categories.entity";
 import { FosterApplicationsRepository } from "../../repositories/applications/foster-applications.repository";
+import { FosterApplicationPetCategory } from "../foster-application-pet-category.entity";
 
 @Entity({ repository: () => FosterApplicationsRepository })
 export class FosterApplications extends BaseEntity {
@@ -90,6 +91,9 @@ export class FosterApplications extends BaseEntity {
     @ManyToOne()
     houseOwnershipType: HouseOwnershipTypes
 
-    @ManyToMany()
-    petType = new Collection<PetCategories>(this);
+    @OneToMany(
+        () => FosterApplicationPetCategory,
+        fosterApplicationPetCategory => fosterApplicationPetCategory.fosterApplication
+    )
+    fosterRequest = new Collection<FosterApplicationPetCategory>(this);
 }

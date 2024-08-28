@@ -6,6 +6,7 @@ import { HouseholdTypesRepository } from './repositories/household-types.reposit
 import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
 import { GenderRepository } from './repositories/gender.repository';
 import { StatusRepository } from './repositories/status.repository';
+import { STATUS } from './entities/status.entity';
 
 @Injectable()
 export class SettingsService {  
@@ -38,6 +39,14 @@ export class SettingsService {
 
   getAllHouseholdMemberTypes() {
     return this.householdMemberTypesRepository.findAll();
+  }
+
+  findStatusByValue(value: STATUS) {
+    try {
+      return this.statusRepository.findOneOrFail({ value })
+    } catch(e) {
+      throw(e)
+    }
   }
 
   findOneGender(id: number) {

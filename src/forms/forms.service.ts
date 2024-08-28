@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { SesService } from '../aws/ses/ses.service';
 import mapByKey from '../common/mapByKey';
 import { PetsService } from '../pets/pets.service';
@@ -19,6 +19,10 @@ import { ContactUsMessagesRepository } from './repositories/contact-us-messages.
 import { VolunteerAvailabilitiesRepository } from './repositories/volunteers/volunteer-availabilities.repository';
 import { VolunteersRepository } from './repositories/volunteers/volunteers.repository';
 import { FosterFormBuilder, AdoptionFormBuilder } from './builder/form.builder';
+import { AdoptApplicationPetRepository } from './repositories/adopt-application-pet.repository';
+import { FosterApplicationPetCategoryRepository } from './repositories/foster-application-pet-category.repository';
+import { STATUS } from '../settings/entities/status.entity';
+import { PetCategories } from '../pets/entities/pet-categories.entity';
 
 @Injectable()
 export class FormsService {
@@ -36,6 +40,8 @@ export class FormsService {
     private readonly referenceInfoRepository: ReferenceInfoRepository,
     private readonly householdTypesRepository: HouseholdTypesRepository,
     private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
+    private readonly fosterApplicationPetCategoryRepository: FosterApplicationPetCategoryRepository,
+    private readonly adoptApplicationPetRepository: AdoptApplicationPetRepository,
   ) {}
 
   async createContactUs(createContactUsFormDto: CreateContactUsFormDto) {
@@ -112,6 +118,7 @@ export class FormsService {
         petsInfo,
         childrenInfo,
         // MANDATORY
+        adoptPetId,
         fosterPetTypeId,
         firstName,
         lastName,
@@ -143,6 +150,7 @@ export class FormsService {
       const householdType = await this.householdTypesRepository.findOneOrFail({ value: householdTypeValue });
       const houseOwnershipType = await this.houseOwnershipTypesRepository.findOneOrFail(houseOwnershipId);
       const householdMemberTypes = mapByKey(await this.settingsService.getAllHouseholdMemberTypes(), 'value');
+      const pendingStatus = await this.settingsService.findStatusByValue(STATUS.PENDING);
 
       const dto = {
         firstName,
@@ -173,8 +181,8 @@ export class FormsService {
       }
 
       const builder = isFoster
-      ? new FosterFormBuilder(this.fosterApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository)
-      : new AdoptionFormBuilder(this.adoptApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository);
+      ? new FosterFormBuilder(this.fosterApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.fosterApplicationPetCategoryRepository)
+      : new AdoptionFormBuilder(this.adoptApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.adoptApplicationPetRepository);
       builder.setForm(dto);
       builder.setReferenceInfo(referenceInfo);
       if(householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
@@ -185,10 +193,13 @@ export class FormsService {
       const application = builder.getForm();
     
     if(isFoster) {
-      const petTypes = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
-      petTypes.forEach((petType) => {
-        (application as FosterApplications).petType.add(petType);
-      })
+      const petCategories = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
+      if(!petCategories.length) throw new NotFoundException();
+      (builder as FosterFormBuilder).setMapping(pendingStatus, petCategories)
+    } else {
+      const pets = await this.petsService.findMultiplePet(adoptPetId)
+      if(!pets.length) throw new NotFoundException();
+      (builder as AdoptionFormBuilder).setMapping(pendingStatus, pets)
     }
 
       await this.em.persistAndFlush(application);
@@ -207,7 +218,7 @@ export class FormsService {
     try {
       return this.fosterApplicationsRepository.findOneOrFail(id, {
         populate:[
-          'petType',
+          'fosterRequest',
           'houseOwnershipType',
           'householdType',
           'referenceInfo',
@@ -225,6 +236,7 @@ export class FormsService {
     try {
       return this.adoptApplicationsRepository.findOneOrFail(id, {
         populate:[
+          'adoptRequest',
           'houseOwnershipType',
           'householdType',
           'referenceInfo',

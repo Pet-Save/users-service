@@ -1,6 +1,6 @@
-import { Collection, Entity, ManyToMany, Property } from "@mikro-orm/core";
+import { Collection, Entity, OneToMany, Property } from "@mikro-orm/core";
 import { BaseEntity } from "../../db/base.entity";
-import { FosterApplications } from "../../forms/entities/applications/foster-applications.entity";
+import { FosterApplicationPetCategory } from "../../forms/entities/foster-application-pet-category.entity";
 import { PetCategoriesRepository } from "../repositories/pet-categories.repository";
 
 export enum PET_CATEGORY {
@@ -13,6 +13,9 @@ export class PetCategories extends BaseEntity {
     @Property({ length: 50, unique: true })
     value: string;
 
-    @ManyToMany(() => FosterApplications, fosterApplications => fosterApplications.petType)
-    fosterApplciation ?= new Collection<FosterApplications>(this);
+    @OneToMany(
+        () => FosterApplicationPetCategory,
+        fosterApplicationPetCategory => fosterApplicationPetCategory.petCategory
+    )
+    fosterRequest = new Collection<FosterApplicationPetCategory>(this);
 }

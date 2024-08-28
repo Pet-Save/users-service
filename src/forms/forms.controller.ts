@@ -31,18 +31,22 @@ export class FormsController {
   async createApplications(@Body() createApplicationDto: CreateApplicationDto) {
     try{
       switch(true) {
-        case("adoptPet" in createApplicationDto && createApplicationDto?.adoptPet?.length > 0): {
+        case("adoptPetId" in createApplicationDto && createApplicationDto?.adoptPetId?.length > 0): {
+          console.log('adopt')
           return this.formsService.createPetApplication(createApplicationDto, false)
         }
         case("fosterPetTypeId" in createApplicationDto && createApplicationDto.fosterPetTypeId.length > 0): {
+          console.log('foster')
           return await this.formsService.createPetApplication(createApplicationDto, true)
         }
         default: {
-          return new UnprocessableEntityException()
+          console.log('default')
+          throw new UnprocessableEntityException()
         }
       }
     } catch(e) {
-      return e
+      console.log('g')
+      throw e
     }
   }
 

@@ -14,6 +14,8 @@ import { PetsModule } from '../pets/pets.module';
 import { ReferenceInfo } from './entities/applications/reference-info.entity';
 import { HouseholdInfo } from './entities/applications/household-info.entity';
 import { AwsModule } from '../aws/aws.module';
+import { FosterApplicationPetCategory } from './entities/foster-application-pet-category.entity';
+import { AdoptApplicationPet } from './entities/adopt-application-pet.entity';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { AwsModule } from '../aws/aws.module';
       HouseholdInfo,
       HouseOwnershipTypes,
       ReferenceInfo,
+      FosterApplicationPetCategory,
+      AdoptApplicationPet
     ]),
     SettingsModule,
     PetsModule,
