@@ -4,7 +4,7 @@ import { HouseholdTypes } from "../../../settings/entities/household-types.entit
 import { HouseOwnershipTypes } from "../../../settings/entities/house-ownership-types.entity";
 import { HouseholdInfo } from "./household-info.entity";
 import { ReferenceInfo } from "./reference-info.entity";
-import { PetCategories } from "../../../pets/entities/pet_categories.entity";
+import { PetCategories } from "../../../pets/entities/pet-categories.entity";
 
 @Entity()
 export class FosterApplications extends BaseEntity {
