@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DayOfAWeekRepository } from './repositories/day-of-a-week.repository';
 import { HouseOwnershipTypesRepository } from './repositories/house-ownership-types.repository';
 import { HouseholdMemberTypesRepository } from './repositories/household-member-type.repository';
@@ -53,7 +53,7 @@ export class SettingsService {
     try {
       return this.genderRepository.findOneOrFail(id)
     } catch(e) {
-      throw e
+      throw new NotFoundException(`Gender ${id} does not exist`)
     }
   }
 }

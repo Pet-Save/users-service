@@ -6,16 +6,25 @@ import { HouseholdTypesRepository } from './repositories/household-types.reposit
 import { TimeOfADayRepository } from './repositories/time-of-a-day.repository';
 import { SettingsService } from './settings.service';
 import { GenderRepository } from './repositories/gender.repository';
+import { NotFoundException } from '@nestjs/common';
+import { StatusRepository } from './repositories/status.repository';
+import { EntityRepository, Loaded } from '@mikro-orm/postgresql';
+import { Gender } from './entities/gender.entity';
+import { getRepositoryToken } from '@mikro-orm/nestjs';
+import { STATUS } from './entities/status.entity';
 
 describe('SettingsService', () => {
   let service: SettingsService;
-
-  const mockEntityManager = {
-    persistAndFlush: jest.fn().mockImplementation(async () => { }),
-  };
+  let gender: GenderRepository;
+  let status: StatusRepository;
+  let timeOfADay: TimeOfADayRepository;
+  let dayOfAWeek: DayOfAWeekRepository;
+  let householdTypes: HouseholdTypesRepository;
+  let houseOwnershipTypes: HouseOwnershipTypesRepository;
+  let householdMemberTypes: HouseholdMemberTypesRepository;
 
   const mockDayOfAWeekRepository = {
-    findAll: jest.fn().mockImplementation(async () => []),
+    findAll: jest.fn(),
   };
 
   const mockTimeOfADayRepository = {
@@ -23,21 +32,23 @@ describe('SettingsService', () => {
   };
 
   const mockHouseholdTypesRepository = {
-    findAll: jest.fn().mockImplementation(async () => []),
+    findAll: jest.fn(),
   };
 
   const mockHouseOwnershipTypesRepository = {
-    findAll: jest.fn().mockImplementation(async () => []),
+    findAll: jest.fn(),
   };
 
   const mockHouseholdMemberTypesRepository = {
-    findAll: jest.fn().mockImplementation(async () => []),
+    findAll: jest.fn(),
   };
 
   const mockGenderRepository = {
-    findOneOrFail: jest.fn().mockImplementation(async (id) => {
-      return ({ id })
-    })
+    findOneOrFail: jest.fn(),
+  }
+
+  const mockStatusRepository = {
+    findOneOrFail: jest.fn(),
   }
 
   beforeEach(async () => {
@@ -67,11 +78,22 @@ describe('SettingsService', () => {
       {
         provide: GenderRepository,
         useValue: mockGenderRepository,
+      },
+      {
+        provide: StatusRepository,
+        useValue: mockStatusRepository,
       }
     ],
   }).compile();
 
   service = module.get<SettingsService>(SettingsService);
+  gender = module.get(GenderRepository);
+  status = module.get(StatusRepository);
+  timeOfADay = module.get(TimeOfADayRepository);
+  dayOfAWeek = module.get(DayOfAWeekRepository);
+  householdTypes = module.get(HouseholdTypesRepository);
+  houseOwnershipTypes = module.get(HouseOwnershipTypesRepository);
+  householdMemberTypes = module.get(HouseholdMemberTypesRepository);
 });
 
 it('should be defined', () => {
@@ -80,39 +102,82 @@ it('should be defined', () => {
 
 describe('TimeOfADayRepository', () => {
   it('should return all TimeOfADay', async () => {
-    expect(await service.getAllTimeOfADay()).toStrictEqual([]);
+    jest.spyOn(timeOfADay, 'findAll').mockResolvedValue([]);
+    expect(await service.getAllTimeOfADay()).toEqual([]);
+    expect(timeOfADay.findAll).toHaveBeenCalledWith();
+    expect(timeOfADay.findAll).toHaveBeenCalled();
   });
 })
 
 describe('DayOfAWeekRepository', () => {
   it('should return all DayOfAWeek', async () => {
-    expect(await service.getAllDayOfAWeek()).toStrictEqual([]);
+    jest.spyOn(dayOfAWeek, 'findAll').mockResolvedValue([]);
+    expect(await service.getAllDayOfAWeek()).toEqual([]);
+    expect(dayOfAWeek.findAll).toHaveBeenCalledWith();
+    expect(dayOfAWeek.findAll).toHaveBeenCalled();
   });
 })
 
 describe('HouseholdTypesRepository', () => {
   it('should return all HouseholdTypes', async () => {
-    expect(await service.getAllHouseholdTypes()).toStrictEqual([]);
+    jest.spyOn(householdTypes, 'findAll').mockResolvedValue([]);
+    expect(await service.getAllHouseholdTypes()).toEqual([]);
+    expect(householdTypes.findAll).toHaveBeenCalledWith();
+    expect(householdTypes.findAll).toHaveBeenCalled();
   });
 })
 
 describe('HouseOwnershipTypesRepository', () => {
   it('should return all HouseOwnershipTypes', async () => {
-    expect(await service.getAllHouseOwnershipTypes()).toStrictEqual([]);
+    jest.spyOn(houseOwnershipTypes, 'findAll').mockResolvedValue([]);
+    expect(await service.getAllHouseOwnershipTypes()).toEqual([]);
+    expect(houseOwnershipTypes.findAll).toHaveBeenCalledWith();
+    expect(houseOwnershipTypes.findAll).toHaveBeenCalled();
   });
 })
 
 describe('HouseholdMemberTypesRepository', () => {
   it('should return all HouseholdMemberTypes', async () => {
-    expect(await service.getAllHouseholdMemberTypes()).toStrictEqual([]);
+    jest.spyOn(householdMemberTypes, 'findAll').mockResolvedValue([]);
+    expect(await service.getAllHouseholdMemberTypes()).toEqual([]);
+    expect(householdMemberTypes.findAll).toHaveBeenCalledWith();
+    expect(householdMemberTypes.findAll).toHaveBeenCalled();
+  });
+})
+
+describe('StatusRepository', () => {
+  const value = STATUS.PENDING;
+
+  it('should return all one Status', async () => {
+    jest.spyOn(status, 'findOneOrFail').mockResolvedValue({ value } as Loaded<Gender, string, string, string>);
+    expect(await service.findStatusByValue(value)).toEqual({ value });
+    expect(status.findOneOrFail).toHaveBeenCalledWith({ value });
+  });
+
+  it('should throw NotFoundException', async () => {
+    const message = `Status value: ${value} does not exist`;
+    jest.spyOn(status, 'findOneOrFail').mockRejectedValue(new NotFoundException(message));
+    await expect(service.findStatusByValue(value)).rejects.toThrow(message);
+    expect(status.findOneOrFail).toHaveBeenCalledWith({ value });
+    expect(status.findOneOrFail).toHaveBeenCalled();
   });
 })
 
 describe('GenderRepository', () => {
+  const id = 1;
   it('should return one Gender', async () => {
-    const id = 1;
-    const gender = await service.findOneGender(id);
-    expect(gender).toEqual({ id })
+    jest.spyOn(gender, 'findOneOrFail').mockResolvedValue({ id } as Loaded<Gender, string, string, string>);
+    expect(await service.findOneGender(id)).toEqual({ id });
+    expect(gender.findOneOrFail).toHaveBeenCalledWith(id);
+    expect(gender.findOneOrFail).toHaveBeenCalled();
+  });
+
+  it('should throw NotFoundException', async () => {
+    const message = `Gender ${id} does not exist`;
+    jest.spyOn(gender, 'findOneOrFail').mockRejectedValue(new NotFoundException(message));
+    await expect(service.findOneGender(id)).rejects.toThrow(message);
+    expect(gender.findOneOrFail).toHaveBeenCalledWith(id);
+    expect(gender.findOneOrFail).toHaveBeenCalled();
   });
 })
 });

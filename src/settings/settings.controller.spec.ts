@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
+import { Loaded } from '@mikro-orm/postgresql';
+import { Gender } from './entities/gender.entity';
 
 describe('SettingsController', () => {
   let controller: SettingsController;
@@ -12,6 +14,7 @@ describe('SettingsController', () => {
     getAllHouseholdTypes: jest.fn().mockResolvedValue({ id: 1, name: 'Created Entity' }),
     getAllHouseOwnershipTypes: jest.fn().mockResolvedValue({ id: 1, name: 'Created Entity' }),
     getAllHouseholdMemberTypes: jest.fn().mockResolvedValue({ id: 1, name: 'Created Entity' }),
+    findOneGender: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -94,6 +97,18 @@ describe('SettingsController', () => {
       const result = await controller.getAllHouseholdMemberTypes();
       expect(spy).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockValue);
+    })
+  })
+
+  describe('GET/gender/:id', () => {
+    const id = 1;
+    it('should return 200 status', async () => {
+      const spy = jest.spyOn(service, 'findOneGender');
+      spy.mockImplementation(async (mockId: number) => ({ id: mockId }) as unknown as Promise<Loaded<Gender, never, "*", never>>);
+
+      const result = await controller.findOneGender(id);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({id});
     })
   })
 });
