@@ -14,6 +14,7 @@ async function bootstrap() {
   const PORT = configService.get<string>('PORT') || 3000;
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
+    forbidNonWhitelisted: true
   }));
   app.setGlobalPrefix('api/v1', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],

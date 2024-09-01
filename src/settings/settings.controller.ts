@@ -50,7 +50,16 @@ export class SettingsController {
     }
   }
 
-  @Get('gender/:id')
+  @Get('genders')
+  findAllGender(@Param('id') id: number) {
+    try {
+      return this.settingsService.findAllGender();
+    } catch (e) {
+      return new BadGatewayException(e);
+    }
+  }
+
+  @Get('genders/:id')
   findOneGender(@Param('id') id: number) {
     try {
       return this.settingsService.findOneGender(id);

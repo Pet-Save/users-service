@@ -3,6 +3,7 @@ import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
 import { CreatePetImageDto } from './dto/create-pet-image.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { PetsService } from './pets.service';
+import { QueryPetDto } from './dto/query-pet.dto';
 
 @Controller('pets')
 export class PetsController {
@@ -27,7 +28,17 @@ export class PetsController {
     return this.petsService.createPet(createPetDto);
   }
 
-  @Get('/category/:id')
+  @Get()
+  findPets(@Body()options: QueryPetDto) {
+    return this.petsService.findPet(options);
+  }
+
+  @Get('/categories')
+  findAllPetCategory() {
+    return this.petsService.findAllPetCategory();
+  }
+
+  @Get('/categories/:id')
   findOnePetCategory(@Param('id')id: number) {
     return this.petsService.findOnePetCategory(id);
   }

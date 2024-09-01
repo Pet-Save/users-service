@@ -49,6 +49,14 @@ export class SettingsService {
     }
   }
 
+  findAllGender() {
+    try {
+      return this.genderRepository.findAll()
+    } catch(e) {
+      throw new NotFoundException()
+    }
+  }
+
   findOneGender(id: number) {
     try {
       return this.genderRepository.findOneOrFail(id)

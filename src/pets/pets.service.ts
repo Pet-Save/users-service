@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
 import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
@@ -7,6 +7,7 @@ import { PetCategoriesRepository } from './repositories/pet-categories.repositor
 import { PetImagesRepository } from './repositories/pet-images.repository';
 import { PetsRepository } from './repositories/pets.repository';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { QueryPetDto } from './dto/query-pet.dto';
 
 @Injectable()
 export class PetsService {
@@ -75,14 +76,31 @@ export class PetsService {
     }
   }
 
-  findOnePetCategory(id: number) {
-    return this.petCategoriesRepository.findOneOrFail(id);
+  findAllPetCategory() {
+    try {
+      return this.petCategoriesRepository.findAll();
+    } catch(e) {
+      throw new NotFoundException()
+    }
   }
 
-  findMultiplePet(ids: number[]) {
-    return this.petsRepository.find({
-      id: { $in: ids }
-    });
+  findOnePetCategory(id: number) {
+    try {
+      return this.petCategoriesRepository.findOneOrFail(id);
+    } catch(e) {
+      throw new NotFoundException(`Pet Category ${id} does not exist`)
+    }
+  }
+
+  findPet(options: QueryPetDto) {
+    try {
+      const option: any = {};
+      if(options.id) option.id = options.id;
+      if(options.categoryId) option.petCategory = options.categoryId;
+      return this.petsRepository.find(option);
+    } catch(e) {
+      throw e
+    }
   }
 
   findMultiplePetCategory(ids: number[]) {

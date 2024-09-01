@@ -1,31 +1,29 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SesService } from '../aws/ses/ses.service';
 import mapByKey from '../common/mapByKey';
 import { PetsService } from '../pets/pets.service';
+import { STATUS } from '../settings/entities/status.entity';
 import { HouseOwnershipTypesRepository } from '../settings/repositories/house-ownership-types.repository';
 import { HouseholdTypesRepository } from '../settings/repositories/household-types.repository';
 import { SettingsService } from '../settings/settings.service';
+import { AdoptionFormBuilder, FosterFormBuilder } from './builder/form.builder';
 import { CreateApplicationDto, HOUSEHOLD_MEMBER_TYPE, HOUSEHOLD_TYPES } from './dto/create-application.dto';
 import { CreateContactUsFormDto } from './dto/create-contact-us-form.dto';
 import { CreateVolunteerDto } from './dto/create-volunteer.dto';
-import { AdoptApplications } from './entities/applications/adopt-applications.entity';
-import { FosterApplications } from './entities/applications/foster-applications.entity';
+import { AdoptApplicationPetRepository } from './repositories/adopt-application-pet.repository';
 import { AdoptApplicationsRepository } from './repositories/applications/adopt-applications.repository';
 import { FosterApplicationsRepository } from './repositories/applications/foster-applications.repository';
 import { HouseholdInfoRepository } from './repositories/applications/household-info.repository';
 import { ReferenceInfoRepository } from './repositories/applications/reference-info.repository';
 import { ContactUsMessagesRepository } from './repositories/contact-us-messages.repository';
+import { FosterApplicationPetCategoryRepository } from './repositories/foster-application-pet-category.repository';
 import { VolunteerAvailabilitiesRepository } from './repositories/volunteers/volunteer-availabilities.repository';
 import { VolunteersRepository } from './repositories/volunteers/volunteers.repository';
-import { FosterFormBuilder, AdoptionFormBuilder } from './builder/form.builder';
-import { AdoptApplicationPetRepository } from './repositories/adopt-application-pet.repository';
-import { FosterApplicationPetCategoryRepository } from './repositories/foster-application-pet-category.repository';
-import { STATUS } from '../settings/entities/status.entity';
-import { PetCategories } from '../pets/entities/pet-categories.entity';
 
 @Injectable()
 export class FormsService {
+  private readonly logger = new Logger(FormsService.name);
   constructor(
     private readonly settingsService: SettingsService,
     private readonly petsService: PetsService,
@@ -42,7 +40,7 @@ export class FormsService {
     private readonly houseOwnershipTypesRepository: HouseOwnershipTypesRepository,
     private readonly fosterApplicationPetCategoryRepository: FosterApplicationPetCategoryRepository,
     private readonly adoptApplicationPetRepository: AdoptApplicationPetRepository,
-  ) {}
+  ) { }
 
   async createContactUs(createContactUsFormDto: CreateContactUsFormDto) {
     try {
@@ -60,7 +58,7 @@ export class FormsService {
       );
       await this.em.flush();
       return message
-    } catch(e) {
+    } catch (e) {
       console.error(e)
       return e
     }
@@ -85,7 +83,7 @@ export class FormsService {
         .forEach(([day, time]) => {
           const dayId = dayOfAWeek[day];
           const temp = []
-          for(const session of time) {
+          for (const session of time) {
             volunteer.availabilities.add(this.volunteerAvailabilitiesRepository.create({
               dayOfAWeek: dayId,
               timeOfADay: timeOfADay[session],
@@ -102,11 +100,11 @@ export class FormsService {
         + `${Object.entries({ email, ...remaining }).map(([key, value]) => `${key}: ${value}`).join('\n')}\n\n`
         + 'Available Time:\n'
         + `${availabilityString}\n\n`
-        +`reply to ${email} if interested.`
+        + `reply to ${email} if interested.`
       );
       await this.em.persistAndFlush(volunteer);
       return volunteer;
-    } catch(e) {
+    } catch (e) {
       throw e
     }
   }
@@ -146,11 +144,9 @@ export class FormsService {
         houseOwnershipId,
         referenceInfo,
       } = createPetFosterApplicationForms;
-  
+
       const householdType = await this.householdTypesRepository.findOneOrFail({ value: householdTypeValue });
       const houseOwnershipType = await this.houseOwnershipTypesRepository.findOneOrFail(houseOwnershipId);
-      const householdMemberTypes = mapByKey(await this.settingsService.getAllHouseholdMemberTypes(), 'value');
-      const pendingStatus = await this.settingsService.findStatusByValue(STATUS.PENDING);
 
       const dto = {
         firstName,
@@ -181,35 +177,36 @@ export class FormsService {
       }
 
       const builder = isFoster
-      ? new FosterFormBuilder(this.fosterApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.fosterApplicationPetCategoryRepository)
-      : new AdoptionFormBuilder(this.adoptApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.adoptApplicationPetRepository);
+        ? new FosterFormBuilder(this.fosterApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.fosterApplicationPetCategoryRepository)
+        : new AdoptionFormBuilder(this.adoptApplicationsRepository, this.referenceInfoRepository, this.householdInfoRepository, this.adoptApplicationPetRepository);
       builder.setForm(dto);
       builder.setReferenceInfo(referenceInfo);
-      if(householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
+
+      const householdMemberTypes = mapByKey(await this.settingsService.getAllHouseholdMemberTypes(), 'value');
+      if (householdTypeValue !== HOUSEHOLD_TYPES.SINGLE) {
         builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.ADULT], householdMemberInfo)
       }
       if (haveChildren) builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.CHILD], childrenInfo)
       if (havePetNow) builder.setHouseholdInfo(householdMemberTypes[HOUSEHOLD_MEMBER_TYPE.PET], petsInfo)
+      const pendingStatus = await this.settingsService.findStatusByValue(STATUS.PENDING);
+      if (isFoster) {
+        const petCategories = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
+        if (!petCategories.length) throw new NotFoundException();
+        (builder as FosterFormBuilder).setMapping(pendingStatus, petCategories)
+      } else {
+        const pets = await this.petsService.findPet({ id: adoptPetId });
+        if (!pets.length) throw new NotFoundException();
+        (builder as AdoptionFormBuilder).setMapping(pendingStatus, pets)
+      }
       const application = builder.getForm();
-    
-    if(isFoster) {
-      const petCategories = await this.petsService.findMultiplePetCategory(fosterPetTypeId);
-      if(!petCategories.length) throw new NotFoundException();
-      (builder as FosterFormBuilder).setMapping(pendingStatus, petCategories)
-    } else {
-      const pets = await this.petsService.findMultiplePet(adoptPetId)
-      if(!pets.length) throw new NotFoundException();
-      (builder as AdoptionFormBuilder).setMapping(pendingStatus, pets)
-    }
-
       await this.em.persistAndFlush(application);
-      if(isFoster) {
+      if (isFoster) {
         return this.findOnePetFoster(application.id);
       } else {
         return this.findOnePetAdopt(application.id);
       }
-    } catch(e) {
-      console.error(e);
+    } catch (e) {
+      this.logger.error(e);
       throw e;
     }
   }
@@ -217,7 +214,7 @@ export class FormsService {
   findOnePetFoster(id: number) {
     try {
       return this.fosterApplicationsRepository.findOneOrFail(id, {
-        populate:[
+        populate: [
           'fosterRequest',
           'houseOwnershipType',
           'householdType',
@@ -226,7 +223,7 @@ export class FormsService {
           'householdInfo.householdMemberType'
         ]
       })
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       throw e;
     }
@@ -235,7 +232,7 @@ export class FormsService {
   findOnePetAdopt(id: number) {
     try {
       return this.adoptApplicationsRepository.findOneOrFail(id, {
-        populate:[
+        populate: [
           'adoptRequest',
           'houseOwnershipType',
           'householdType',
@@ -244,7 +241,7 @@ export class FormsService {
           'householdInfo.householdMemberType'
         ]
       })
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       throw e;
     }
