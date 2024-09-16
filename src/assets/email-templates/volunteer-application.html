@@ -7,8 +7,7 @@
     <style>
         #timetable {
             padding: 0 50px;
-            background-color: #FFA375
-            ;
+            background-color: #FFA375;
         }
 
         .two-cols-grid {
@@ -103,20 +102,17 @@
         <div class="flex">
             <div class="flex-item">{{@key}}</div>
             <div class="flex-item text-center">
-                <input type="checkbox" {{#if (includesElement this 'morning')}} checked {{/if}} disabled />
+                <input type="checkbox" {{#if (includesElement this 'morning' )}} checked {{/if}} disabled />
             </div>
             <div class="flex-item text-center">
-                <input type="checkbox" {{#if (includesElement this 'afternoon')}} checked {{/if}} disabled />
+                <input type="checkbox" {{#if (includesElement this 'afternoon' )}} checked {{/if}} disabled />
             </div>
             <div class="flex-item text-center">
-                <input type="checkbox" {{#if (includesElement this 'evening')}} checked {{/if}} disabled />
+                <input type="checkbox" {{#if (includesElement this 'evening' )}} checked {{/if}} disabled />
             </div>
-
         </div>
         {{/each}}
-
     </section>
-
 </body>
 
 </html>
