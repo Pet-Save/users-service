@@ -9,6 +9,14 @@ Handlebars.registerHelper('includesElement', (array, element) => {
     return array.includes(element);
 });
 
+Handlebars.registerHelper('ifEquals', function(arg1, arg2) {
+    return (arg1 == arg2)
+});
+
+Handlebars.registerHelper('add', function(arg1, arg2) {
+    return arg1 + arg2
+});
+
 @Injectable()
 export class SesService {
     constructor(private configService: ConfigService) {}
