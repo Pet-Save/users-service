@@ -51,10 +51,12 @@ export class FormsService {
         updatedBy: createContactUsFormDto.email
       })
       await this.sesService.sendEmail(
-        `New Incoming Contact Us Message From ${createContactUsFormDto.email}`,
-        `${createContactUsFormDto.firstName} ${createContactUsFormDto.lastName} has sent a message to us:\n\n
-        ${createContactUsFormDto.message}\n`
-        + `reply to ${createContactUsFormDto.email} if interested.`
+        'contact-us.html',
+        `New Incoming Contact Us Message from ${createContactUsFormDto.email}`,
+        {
+          email: createContactUsFormDto.email,
+          content: createContactUsFormDto.message
+        }
       );
       await this.em.flush();
       return message
@@ -77,7 +79,7 @@ export class FormsService {
         updatedBy: email
       })
 
-      let availabilityString = '';
+      const ttb: {[key: string]: string[]} = {};
       Object.entries(timetable)
         .filter(([, time]) => time)
         .forEach(([day, time]) => {
@@ -92,15 +94,12 @@ export class FormsService {
             }))
             temp.push(timeOfADay[session].value)
           }
-          availabilityString += `${dayId.value.toUpperCase()}: ${temp.join(', ')}\n`
+          ttb[dayId.value] = temp;
         })
       await this.sesService.sendEmail(
+        'volunteer-application.html',
         `New Volunteer Application`,
-        `${createVolunteerDto.firstName} ${createVolunteerDto.lastName} has applied as a new volunteer:\n\n`
-        + `${Object.entries({ email, ...remaining }).map(([key, value]) => `${key}: ${value}`).join('\n')}\n\n`
-        + 'Available Time:\n'
-        + `${availabilityString}\n\n`
-        + `reply to ${email} if interested.`
+        { email, ...remaining, ttb }
       );
       await this.em.persistAndFlush(volunteer);
       return volunteer;
@@ -199,6 +198,11 @@ export class FormsService {
         (builder as AdoptionFormBuilder).setMapping(pendingStatus, pets)
       }
       const application = builder.getForm();
+      await this.sesService.sendEmail(
+        isFoster ? 'foster-application.html' : 'adoption-application.html',
+        `New Adoption Application`,
+        application
+      );
       await this.em.persistAndFlush(application);
       if (isFoster) {
         return this.findOnePetFoster(application.id);
