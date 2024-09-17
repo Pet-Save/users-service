@@ -115,6 +115,7 @@ export class CreateApplicationDto {
     @IsNotEmpty()
     socialMediaAccount: string;
 
+    // TODO: no need check if applicant owns the palce
     @IsBoolean()
     @IsNotEmpty()
     allowPets: boolean;
