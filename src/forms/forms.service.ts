@@ -101,7 +101,7 @@ export class FormsService {
         `New Volunteer Application`,
         { email, ...remaining, ttb }
       );
-      await this.em.persistAndFlush(volunteer);
+      // await this.em.persistAndFlush(volunteer);
       return volunteer;
     } catch (e) {
       throw e
@@ -200,7 +200,7 @@ export class FormsService {
       const application = builder.getForm();
       await this.sesService.sendEmail(
         isFoster ? 'foster-application.html' : 'adoption-application.html',
-        `New Adoption Application`,
+        `New ${ isFoster ? 'Foster' : 'Adoption' } Application`,
         application
       );
       await this.em.persistAndFlush(application);
