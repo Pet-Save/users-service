@@ -10,6 +10,10 @@ import { FormsModule } from './forms/forms.module';
 import { HealthModule } from './health/health.module';
 import { PetsModule } from './pets/pets.module';
 import { SettingsModule } from './settings/settings.module';
+import { ErrorHandlerModule } from './error-handler/error-handler.module';
+import { UsersModule } from './users/users.module';
+import { APP_FILTER } from '@nestjs/core';
+import { ValidationExceptionFilter } from './common/filters/validation-exception.filter';
 
 
 @Module({
@@ -22,9 +26,17 @@ import { SettingsModule } from './settings/settings.module';
     PetsModule,
     HealthModule,
     AwsModule,
+    ErrorHandlerModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: ValidationExceptionFilter,
+    },
+  ],
 })
 
 export class AppModule implements NestModule, OnApplicationBootstrap {
