@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
 import Cryptr from 'cryptr';
-import { UsersRepository } from './repositories/users.repository';
 import { ValidationException } from '../error-handler/errors/ValidationException';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UsersRepository } from './repositories/users.repository';
+import { JwtService } from '@nestjs/jwt';
+import { ServerException } from '../error-handler/errors/ServerException';
+
 
 @Injectable()
 export class UsersService {
   private cryptr: Cryptr;
-  
   constructor(
     private configService: ConfigService,
     private usersRepository: UsersRepository,
+    private jwtService: JwtService
   ) {
     const secret = this.configService.get('PASSWORD_SECRET');
     this.cryptr = new Cryptr(secret);
@@ -22,6 +24,7 @@ export class UsersService {
     const exists = await this.usersRepository.findOne({ email });
     if(exists) throw new ValidationException(
       'Email already exists.',
+      'UsersService.create',
       { email, password }
     );
     const encryptedPassword = this.cryptr.encrypt(password);
@@ -38,6 +41,7 @@ export class UsersService {
     const exists = await this.usersRepository.findOne({ email });
     if(!exists) throw new ValidationException(
       'Incorrent Email or Password.',
+      'UsersService.login',
       { email, password },
       'Email does not match records in database.'
     );
@@ -45,9 +49,18 @@ export class UsersService {
     const decryptedPassword = this.cryptr.decrypt(exists.password);
     if(password !== decryptedPassword) throw new ValidationException(
       'Incorrent Email or Password.',
+      'UsersService.login',
       { email, password },
       'Password does not match record in database.'
     );
-    return exists;
+    const jwtSecret = await this.configService.get('JWT_SECRET');
+    if(!jwtSecret) throw new ServerException(
+      'Server Error.',
+      'UsersService.login',
+      null,
+      'Missing JWT_SECRET in environment variables'
+    );
+    const accessToken = await this.jwtService.signAsync({ data: JSON.stringify(exists) });
+    return accessToken;
   }
 }

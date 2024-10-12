@@ -14,11 +14,14 @@ import { ErrorHandlerModule } from './error-handler/error-handler.module';
 import { UsersModule } from './users/users.module';
 import { APP_FILTER } from '@nestjs/core';
 import { ValidationExceptionFilter } from './common/filters/validation-exception.filter';
+import { ServerExceptionFilter } from './common/filters/server-exception.filter';
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MikroOrmModule.forRoot(),
     CacheModule.register(),
     FormsModule,
@@ -35,6 +38,10 @@ import { ValidationExceptionFilter } from './common/filters/validation-exception
     {
       provide: APP_FILTER,
       useClass: ValidationExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ServerExceptionFilter,
     },
   ],
 })
