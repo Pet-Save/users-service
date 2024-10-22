@@ -13,18 +13,20 @@ import { JwtModule } from '@nestjs/jwt';
       Users,
     ]),
     JwtModule.registerAsync({
-      useFactory: (config: ConfigService) => {
-        return {
-          secret: config.get<string>('JWT_SECRET'),
-          signOptions: { expiresIn: 60 * 60 },
-        };
-      },
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        global: true,
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: 60 * 60 },
+      }),
       inject: [ConfigService],
     }),
     ConfigModule,
     ErrorHandlerModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [
+    UsersService,
+  ],
 })
 export class UsersModule {}

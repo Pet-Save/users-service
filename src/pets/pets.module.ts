@@ -1,12 +1,13 @@
-import { Module } from '@nestjs/common';
-import { PetsService } from './pets.service';
-import { PetsController } from './pets.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { PetCategories } from './entities/pet-categories.entity';
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { Gender } from '../settings/entities/gender.entity';
-import { Pets } from './entities/pets.entity';
-import { PetImages } from './entities/pet-images.entity';
 import { SettingsModule } from '../settings/settings.module';
+import { PetCategories } from './entities/pet-categories.entity';
+import { PetImages } from './entities/pet-images.entity';
+import { Pets } from './entities/pets.entity';
+import { PetsController } from './pets.controller';
+import { PetsService } from './pets.service';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SettingsModule } from '../settings/settings.module';
       PetImages,
     ]),
     SettingsModule,
+    JwtModule,
   ],
   controllers: [PetsController],
   providers: [PetsService],
