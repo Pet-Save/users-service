@@ -32,15 +32,12 @@ export class FormsController {
     try{
       switch(true) {
         case("adoptPetId" in createApplicationDto && createApplicationDto?.adoptPetId?.length > 0): {
-          console.log('adopt')
           return this.formsService.createPetApplication(createApplicationDto, false)
         }
         case("fosterPetTypeId" in createApplicationDto && createApplicationDto.fosterPetTypeId.length > 0): {
-          console.log('foster')
           return await this.formsService.createPetApplication(createApplicationDto, true)
         }
         default: {
-          console.log('default')
           throw new UnprocessableEntityException()
         }
       }
