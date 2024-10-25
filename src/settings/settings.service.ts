@@ -9,7 +9,7 @@ import { StatusRepository } from './repositories/status.repository';
 import { STATUS } from './entities/status.entity';
 
 @Injectable()
-export class SettingsService {  
+export class SettingsService {
   constructor(
     private readonly timeOfADayRepository: TimeOfADayRepository,
     private readonly dayOfAWeekRepository: DayOfAWeekRepository,
@@ -44,24 +44,20 @@ export class SettingsService {
   findStatusByValue(value: STATUS) {
     try {
       return this.statusRepository.findOneOrFail({ value })
-    } catch(e) {
-      throw(e)
+    } catch (e) {
+      throw (e)
     }
   }
 
   findAllGender() {
     try {
       return this.genderRepository.findAll()
-    } catch(e) {
+    } catch (e) {
       throw new NotFoundException()
     }
   }
 
   findOneGender(id: number) {
-    try {
-      return this.genderRepository.findOneOrFail(id)
-    } catch(e) {
-      throw new NotFoundException(`Gender ${id} does not exist`)
-    }
+    return this.genderRepository.findOneOrFail(id)
   }
 }
