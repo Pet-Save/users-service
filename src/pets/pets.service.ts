@@ -17,31 +17,27 @@ export class PetsService {
     private readonly petCategoriesRepository: PetCategoriesRepository,
     private readonly petsRepository: PetsRepository,
     private readonly petImagesRepository: PetImagesRepository,
-  ) {}
+  ) { }
 
   async createPet(createPetDto: CreatePetDto) {
-    try {
-      const petCategory = await this.findOnePetCategory(createPetDto.categoryId);
-      const gender = await this.settingsService.findOneGender(createPetDto.genderId);
-      const pet = this.petsRepository.create({
-        name: createPetDto.name,
-        petCategory,
-        gender,
-        createdBy: createPetDto.email,
-        updatedBy: createPetDto.email
-      })
-      await this.em.persistAndFlush(pet)
-      return pet
-    } catch(e) {
-      console.error(e)
-      return e
-    }
+    const petCategory = await this.findOnePetCategory(createPetDto.categoryId);
+    const gender = await this.settingsService.findOneGender(createPetDto.genderId);
+    const { categoryId, genderId, ...info } = createPetDto;
+    const pet = this.petsRepository.create({
+      petCategory,
+      gender,
+      ...info,
+      createdBy: createPetDto.email,
+      updatedBy: createPetDto.email
+    })
+    await this.em.persistAndFlush(pet)
+    return pet
   }
 
   async createPetImages(petId: number | Pets, images: string[], email: string) {
     try {
       let temp = petId;
-      if(typeof petId === 'number') temp = await this.petsRepository.findOneOrFail(petId);
+      if (typeof petId === 'number') temp = await this.petsRepository.findOneOrFail(petId);
       const pet = temp as Pets;
       images.map((image) => {
         const imageInstance = this.petImagesRepository.create({
@@ -55,7 +51,7 @@ export class PetsService {
       })
       await this.em.persistAndFlush(pet);
       return images;
-    } catch(e) {
+    } catch (e) {
       console.error(e)
       return e
     }
@@ -70,7 +66,7 @@ export class PetsService {
       })
       await this.em.persistAndFlush(category);
       return category
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       return e
     }
@@ -79,26 +75,26 @@ export class PetsService {
   findAllPetCategory() {
     try {
       return this.petCategoriesRepository.findAll();
-    } catch(e) {
+    } catch (e) {
       throw new NotFoundException()
     }
   }
 
   findOnePetCategory(id: number) {
-    try {
       return this.petCategoriesRepository.findOneOrFail(id);
-    } catch(e) {
-      throw new NotFoundException(`Pet Category ${id} does not exist`)
-    }
+  }
+
+  findOnePet(id: number) {
+    return this.petsRepository.findOneOrFail(id)
   }
 
   findPet(options: QueryPetDto) {
     try {
       const option: any = {};
-      if(options.id) option.id = options.id;
-      if(options.categoryId) option.petCategory = options.categoryId;
+      if (options.id) option.id = options.id;
+      if (options.categoryId) option.petCategory = options.categoryId;
       return this.petsRepository.find(option);
-    } catch(e) {
+    } catch (e) {
       throw e
     }
   }

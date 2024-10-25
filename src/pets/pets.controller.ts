@@ -5,11 +5,14 @@ import { CreatePetImageDto } from './dto/create-pet-image.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { QueryPetDto } from './dto/query-pet.dto';
 import { PetsService } from './pets.service';
+import { ErrorHandlerService } from '../error-handler/error-handler.service';
+import { ValidationError } from '@mikro-orm/postgresql';
 
 @Controller('pets')
 export class PetsController {
   constructor(
     private readonly petsService: PetsService,
+    private readonly errorHandlerService: ErrorHandlerService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -30,8 +33,23 @@ export class PetsController {
 
   @UseGuards(AuthGuard)
   @Post()
-  createPet(@Body() createPetDto: CreatePetDto) {
-    return this.petsService.createPet(createPetDto);
+  async createPet(@Body() createPetDto: CreatePetDto) {
+    try {
+      const newPet = await this.petsService.createPet(createPetDto);
+      return newPet
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
+  }
+
+  @Get('/:id')
+  async findOnePet(@Param('id') id: number) {
+    try {
+      const pet = await this.petsService.findOnePet(id);
+      return pet
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
   }
 
   @Get()

@@ -8,6 +8,7 @@ import { PetImages } from './entities/pet-images.entity';
 import { Pets } from './entities/pets.entity';
 import { PetsController } from './pets.controller';
 import { PetsService } from './pets.service';
+import { ErrorHandlerModule } from '../error-handler/error-handler.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PetsService } from './pets.service';
     ]),
     SettingsModule,
     JwtModule,
+    ErrorHandlerModule,
   ],
   controllers: [PetsController],
   providers: [PetsService],
