@@ -46,6 +46,8 @@ export class UsersService {
       'Email does not match records in database.'
     );
 
+    const { id } = exists;
+
     const decryptedPassword = this.cryptr.decrypt(exists.password);
     if(password !== decryptedPassword) throw new ValidationException(
       'Incorrent Email or Password.',
@@ -60,7 +62,7 @@ export class UsersService {
       null,
       'Missing JWT_SECRET in environment variables'
     );
-    const accessToken = await this.jwtService.signAsync({ data: JSON.stringify(exists) });
+    const accessToken = await this.jwtService.signAsync({ id, email });
     return accessToken;
   }
 }
