@@ -37,7 +37,7 @@ export class UsersService {
     return this.usersRepository.createAndSave(user);
   }
 
-  async login({ email, password }: CreateUserDto) {
+  async login(email: string, password: string) {
     const exists = await this.usersRepository.findOne({ email });
     if(!exists) throw new ValidationException(
       'Incorrent Email or Password.',
