@@ -6,7 +6,6 @@ import { CreatePetDto } from './dto/create-pet.dto';
 import { QueryPetDto } from './dto/query-pet.dto';
 import { PetsService } from './pets.service';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
-import { ValidationError } from '@mikro-orm/postgresql';
 
 @Controller('pets')
 export class PetsController {
@@ -31,15 +30,14 @@ export class PetsController {
     );
   }
 
-  @UseGuards(AuthGuard)
-  @Post()
-  async createPet(@Body() createPetDto: CreatePetDto) {
-    try {
-      const newPet = await this.petsService.createPet(createPetDto);
-      return newPet
-    } catch(e) {
-      this.errorHandlerService.handleError(e)
-    }
+  @Get('/categories')
+  findAllPetCategory() {
+    return this.petsService.findAllPetCategory();
+  }
+
+  @Get('/categories/:id')
+  findOnePetCategory(@Param('id')id: number) {
+    return this.petsService.findOnePetCategory(id);
   }
 
   @Get('/:id')
@@ -57,13 +55,14 @@ export class PetsController {
     return this.petsService.findPet(options);
   }
 
-  @Get('/categories')
-  findAllPetCategory() {
-    return this.petsService.findAllPetCategory();
-  }
-
-  @Get('/categories/:id')
-  findOnePetCategory(@Param('id')id: number) {
-    return this.petsService.findOnePetCategory(id);
+  @UseGuards(AuthGuard)
+  @Post()
+  async createPet(@Body() createPetDto: CreatePetDto) {
+    try {
+      const newPet = await this.petsService.createPet(createPetDto);
+      return newPet
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
   }
 }

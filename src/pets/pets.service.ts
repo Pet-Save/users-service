@@ -72,9 +72,10 @@ export class PetsService {
     }
   }
 
-  findAllPetCategory() {
+  async findAllPetCategory() {
     try {
-      return this.petCategoriesRepository.findAll();
+      const categories = await this.petCategoriesRepository.findAll();
+      return categories
     } catch (e) {
       throw new NotFoundException()
     }
