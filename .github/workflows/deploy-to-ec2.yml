@@ -14,6 +14,8 @@ env:
   AWS_RDS_PASSWORD: ${{secrets.AWS_RDS_PASSWORD}}
   AWS_RDS_DATABASE: ${{secrets.AWS_RDS_DATABASE}}
   ECR_REPOSITORY: pet-save-backend
+  ECS_SERVICE: user-service-p80             # set this to your Amazon ECS service name
+  ECS_CLUSTER: pet-save-prod
 
 jobs:
   deploy:
@@ -48,3 +50,11 @@ jobs:
             .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
             echo "image=$ECR_REGISTRY/$ECR_REPOSITORY --all-tags" >> $GITHUB_OUTPUT
+
+        - name: Update ECS Service
+          id: update-ecs-service
+          run: |
+            aws ecs update-service \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --service ${{ env.ECS_SERVICE }} \
+              --force-new-deployment
