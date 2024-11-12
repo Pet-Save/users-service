@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '../common/guards/auth.guard';
+import { ErrorHandlerService } from '../error-handler/error-handler.service';
 import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
-import { CreatePetImageDto } from './dto/create-pet-image.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { QueryPetDto } from './dto/query-pet.dto';
 import { PetsService } from './pets.service';
-import { ErrorHandlerService } from '../error-handler/error-handler.service';
 
 @Controller('pets')
 export class PetsController {
@@ -15,19 +16,24 @@ export class PetsController {
   ) {}
 
   @UseGuards(AuthGuard)
-  @Post('/categories')
-  createPetCategory(@Body() createPetCategoryDto: CreatePetCategoryDto) {
-    return this.petsService.createPetCategory(createPetCategoryDto);
+  @Post('/:petId/images')
+  @UseInterceptors(FilesInterceptor('images'))
+  async createPetImages(
+    @User() user: any,
+    @Param('petId') petId: number,
+    @UploadedFiles() images: Array<Express.Multer.File>,
+  ) {
+    const imageUrls = await this.petsService.createPetImages(petId, images, user.email);
+    return {
+      fulfilled: imageUrls.getFulfilled(),
+      rejected: imageUrls.getRejected(),
+    }
   }
 
   @UseGuards(AuthGuard)
-  @Post('/images')
-  createPetImages(@Body() createPetImageDto: CreatePetImageDto) {
-    return this.petsService.createPetImages(
-      createPetImageDto.petId,
-      createPetImageDto.imageUrl,
-      createPetImageDto.email,
-    );
+  @Post('/categories')
+  createPetCategory(@Body() createPetCategoryDto: CreatePetCategoryDto) {
+    return this.petsService.createPetCategory(createPetCategoryDto);
   }
 
   @Get('/categories')
