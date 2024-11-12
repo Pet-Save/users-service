@@ -55,7 +55,8 @@ export class Pets extends BaseEntity {
 
     @OneToMany(
         () => PetImages,
-        petImages => petImages.pet
+        petImages => petImages.pet,
+        { eager: true }
     )
     images = new Collection<PetImages>(this);
 
