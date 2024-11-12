@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import Handlebars from 'handlebars';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { fromSSO } from '@aws-sdk/credential-provider-sso';
 
 Handlebars.registerHelper('includesElement', (array, element) => {
     return array.includes(element);
@@ -19,7 +20,19 @@ Handlebars.registerHelper('add', function(arg1, arg2) {
 
 @Injectable()
 export class SesService {
-    constructor(private configService: ConfigService) {}
+    private sesClient: SESClient;
+    
+    constructor(
+        private configService: ConfigService,
+    ) {
+        const env = this.configService.get('NODE_ENV');
+        this.sesClient = new SESClient({
+            region: this.configService.get('AWS_REGION'),
+            credentials: env === 'local'
+                ? fromSSO({ profile: process.env.AWS_PROFILE })
+                : undefined, // Use IAM role in production
+        });
+    }
 
     async getAndHydrateHtmlTemplate(templateName: string, emailData: any) {
         try{
@@ -54,15 +67,8 @@ export class SesService {
                     }
                 },
             }
-            const ses = new SESClient({
-                region: this.configService.get('AWS_REGION') as string,
-                credentials: {
-                    secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY') as string,
-                    accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID') as string,
-                  }
-            });
             const command = new SendEmailCommand(params);
-            const sesResult = await ses.send(command);
+            const sesResult = await this.sesClient.send(command);
             return sesResult;
         } catch (err) {
             console.error(err)
