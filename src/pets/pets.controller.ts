@@ -68,6 +68,7 @@ export class PetsController {
       const newPet = await this.petsService.createPet(createPetDto);
       return newPet
     } catch(e) {
+      console.log(e)
       this.errorHandlerService.handleError(e)
     }
   }
