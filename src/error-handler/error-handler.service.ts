@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationException } from './errors/ValidationException';
 import { ServerException } from './errors/ServerException';
-import { ValidationError as MikroOrmError } from '@mikro-orm/postgresql';
+import { ForeignKeyConstraintViolationException, ValidationError as MikroOrmError } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class ErrorHandlerService {
@@ -13,6 +13,14 @@ export class ErrorHandlerService {
                 error.stack,
                 null,
                 error.name
+            )
+        }
+        else if (error instanceof ForeignKeyConstraintViolationException) {
+            throw new ServerException(
+                error.name,
+                error.stack,
+                null,
+                error.message
             )
         }
         else if (error instanceof ServerException) throw new ServerException(error.message, error.stack, error.queryParams, error.description)
