@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -7,6 +7,7 @@ import { CreatePetCategoryDto } from './dto/create-pet-category.dto';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { QueryPetDto } from './dto/query-pet.dto';
 import { PetsService } from './pets.service';
+import { UpdatePetDto } from './dto/update-pet.dto';
 
 @Controller('pets')
 export class PetsController {
@@ -51,6 +52,17 @@ export class PetsController {
     try {
       const pet = await this.petsService.findOnePet(id);
       return pet
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/:id')
+  async updatePet(@Param('id') id: number, @Body() updatePetDto: UpdatePetDto) {
+    try {
+      const updatedPet = await this.petsService.updatePet(id, updatePetDto);
+      return updatedPet;
     } catch(e) {
       this.errorHandlerService.handleError(e)
     }

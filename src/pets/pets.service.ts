@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, wrap } from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { S3Service } from '../aws/s3/s3.service';
 import EFileDirectory from '../common/enums/s3FileDirectory';
@@ -10,6 +10,7 @@ import { PetCategoriesRepository } from './repositories/pet-categories.repositor
 import { PetImagesRepository } from './repositories/pet-images.repository';
 import { PetsRepository } from './repositories/pets.repository';
 import { ConfigService } from '@nestjs/config';
+import { UpdatePetDto } from './dto/update-pet.dto';
 
 @Injectable()
 export class PetsService {
@@ -106,6 +107,15 @@ export class PetsService {
 		return this.petCategoriesRepository.find({
 			id: { $in: ids }
 		});
+	}
+
+	async updatePet(id: number, updatePetDto: UpdatePetDto) {
+		const pet = await this.findOnePet(id);
+		const updatedPet = wrap(pet).assign({
+			...updatePetDto
+		});
+		await this.em.persistAndFlush(updatedPet);
+		return updatedPet;
 	}
 
 	async deletePet(id: number) {
