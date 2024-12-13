@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -56,6 +56,17 @@ export class PetsController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Delete('/:id')
+  async deletePet(@Param('id') id: number) {
+    try {
+      const deletedPet = await this.petsService.deletePet(id);
+      return deletedPet;
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
+  }
+
   @Get()
   findPets(@Body()options: QueryPetDto) {
     return this.petsService.findPet(options);
@@ -68,7 +79,6 @@ export class PetsController {
       const newPet = await this.petsService.createPet(createPetDto);
       return newPet
     } catch(e) {
-      console.log(e)
       this.errorHandlerService.handleError(e)
     }
   }

@@ -107,4 +107,9 @@ export class PetsService {
 			id: { $in: ids }
 		});
 	}
+
+	async deletePet(id: number) {
+		const pet = await this.findOnePet(id);
+		await this.petsRepository.removeAndFlush(pet);
+	}
 }

@@ -1,4 +1,4 @@
-import { BooleanType, Collection, DateType, Entity, FloatType, ManyToOne, OneToMany, Opt, Property, TextType } from "@mikro-orm/core";
+import { BooleanType, Cascade, Collection, DateType, Entity, FloatType, ManyToOne, OneToMany, Opt, Property, TextType } from "@mikro-orm/core";
 import { BaseEntity } from "../../db/base.entity";
 import { PetCategories } from "./pet-categories.entity";
 import { Gender } from "../../settings/entities/gender.entity";
@@ -56,7 +56,10 @@ export class Pets extends BaseEntity {
     @OneToMany(
         () => PetImages,
         petImages => petImages.pet,
-        { eager: true }
+        {
+            cascade: [Cascade.REMOVE],
+            eager: true
+        }
     )
     images = new Collection<PetImages>(this);
 
