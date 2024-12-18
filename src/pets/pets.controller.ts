@@ -24,10 +24,14 @@ export class PetsController {
     @Param('petId') petId: number,
     @UploadedFiles() images: Array<Express.Multer.File>,
   ) {
-    const imageUrls = await this.petsService.createPetImages(petId, images, user.email);
-    return {
-      fulfilled: imageUrls.getFulfilled(),
-      rejected: imageUrls.getRejected(),
+    try {
+      const imageUrls = await this.petsService.createPetImages(petId, images, user.email);
+      return {
+        fulfilled: imageUrls.getFulfilled(),
+        rejected: imageUrls.getRejected(),
+      }
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
     }
   }
 
