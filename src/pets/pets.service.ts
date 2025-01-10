@@ -60,6 +60,13 @@ export class PetsService {
 		return result;
 	}
 
+	async deletePetImage(imageId: number) {
+		const petImage = await this.petImagesRepository.findOneOrFail(imageId);
+		const petImageS3Location = petImage.imageUrl.split('/').slice(3);
+		await this.s3Service.deleteImage(petImageS3Location.join('/'));
+		await this.petImagesRepository.removeAndFlush(petImage);
+	}
+
 	async createPetCategory(createPetCategoryDto: CreatePetCategoryDto) {
 		try {
 			const category = this.petCategoriesRepository.create({

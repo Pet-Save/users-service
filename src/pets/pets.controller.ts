@@ -36,6 +36,19 @@ export class PetsController {
   }
 
   @UseGuards(AuthGuard)
+  @Delete('/:petId/images/:imageId')
+  async deletePetImage(
+    @Param('imageId') imageId: number,
+  ) {
+    try{
+      const deletedPetImage = await this.petsService.deletePetImage(imageId);
+      return deletedPetImage
+    } catch(e) {
+      this.errorHandlerService.handleError(e)
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Post('/categories')
   createPetCategory(@Body() createPetCategoryDto: CreatePetCategoryDto) {
     return this.petsService.createPetCategory(createPetCategoryDto);

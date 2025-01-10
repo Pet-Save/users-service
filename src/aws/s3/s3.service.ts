@@ -1,4 +1,4 @@
-import { ListBucketsCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, ListBucketsCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
 import { fromSSO } from '@aws-sdk/credential-provider-sso';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -80,6 +80,16 @@ export class S3Service {
                 result.setFullfilled(key)
             }
         })
+        return result;
+    }
+
+    async deleteImage(location: string) {
+        const result = await this.s3Client.send(
+            new DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: location,
+            }
+        ));
         return result;
     }
 }
