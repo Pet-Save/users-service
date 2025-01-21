@@ -36,6 +36,8 @@ export class PetsService {
 			petCategory,
 			gender,
 			...info,
+			isFostered: false,
+			isAdopted: false,
 			createdBy: createPetDto.email,
 			updatedBy: createPetDto.email
 		})
@@ -118,6 +120,7 @@ export class PetsService {
 
 	async updatePet(id: number, updatePetDto: UpdatePetDto) {
 		const pet = await this.findOnePet(id);
+		console.log({ updatePetDto, pet })
 		const updatedPet = wrap(pet).assign({
 			...updatePetDto
 		});

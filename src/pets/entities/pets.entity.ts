@@ -12,10 +12,10 @@ export class Pets extends BaseEntity {
     name: string;
 
     @Property({ default: false, nullable: true })
-    isFostered: boolean & Opt;
+    isFostered: boolean;
 
     @Property({ default: false, nullable: true })
-    isAdopted: boolean & Opt;
+    isAdopted: boolean;
 
     @Property({ type: DateType , nullable: true })
     dateOfBirth: Date & Opt;
